@@ -1,0 +1,9 @@
+{% extends "base.html" %}{% block title %}Configuration{% endblock %}{% block body %}
+<h1>Configuration items</h1><div class="sub">{{ rows|length }} of {{ s['items'] }} items</div>
+<form class="filters"><select name="category"><option value="">All areas</option>{% for c in cats %}<option {{ 'selected' if c==cat }}>{{ c }}</option>{% endfor %}</select>
+<select name="approach"><option value="">All approaches</option>{% for a in ['Direct','Adapt','Redesign','Retire'] %}<option {{ 'selected' if a==appr }}>{{ a }}</option>{% endfor %}</select>
+<input name="q" value="{{ q }}" placeholder="Search rules, products, fields"><button>Filter</button></form>
+<div class="tbl"><table><tr><th>Name</th><th>Type</th><th>What it does</th><th>Approach</th><th>Effort (h)</th></tr>
+{% for it in rows %}<tr><td><a href="{{ url_for('item', name=name, item_id=it.id) }}">{{ it.name }}</a>{% if not it.active %} <span class="small muted">(inactive)</span>{% endif %}</td>
+<td class="small">{{ it.type }}</td><td>{{ it.summary }}</td><td><span class="pill {{ it.approach }}">{{ it.approach }}</span></td><td>{{ '%.1f'|format(it.effort_hours) }}</td></tr>{% endfor %}</table></div>
+{% endblock %}

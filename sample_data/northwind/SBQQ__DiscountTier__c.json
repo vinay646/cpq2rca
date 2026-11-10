@@ -1,0 +1,112 @@
+[
+  {
+    "Id": "a115g0000000001AAA",
+    "Name": "Tier 1",
+    "SBQQ__Schedule__c": "a105g0000000001AAA",
+    "SBQQ__Number__c": 1,
+    "SBQQ__LowerBound__c": 1,
+    "SBQQ__UpperBound__c": 100,
+    "SBQQ__Discount__c": 0,
+    "SBQQ__DiscountAmount__c": null,
+    "SBQQ__Price__c": null
+  },
+  {
+    "Id": "a115g0000000002AAA",
+    "Name": "Tier 2",
+    "SBQQ__Schedule__c": "a105g0000000001AAA",
+    "SBQQ__Number__c": 2,
+    "SBQQ__LowerBound__c": 100,
+    "SBQQ__UpperBound__c": 500,
+    "SBQQ__Discount__c": 10,
+    "SBQQ__DiscountAmount__c": null,
+    "SBQQ__Price__c": null
+  },
+  {
+    "Id": "a115g0000000003AAA",
+    "Name": "Tier 3",
+    "SBQQ__Schedule__c": "a105g0000000001AAA",
+    "SBQQ__Number__c": 3,
+    "SBQQ__LowerBound__c": 500,
+    "SBQQ__UpperBound__c": 1000,
+    "SBQQ__Discount__c": 15,
+    "SBQQ__DiscountAmount__c": null,
+    "SBQQ__Price__c": null
+  },
+  {
+    "Id": "a115g0000000004AAA",
+    "Name": "Tier 4",
+    "SBQQ__Schedule__c": "a105g0000000001AAA",
+    "SBQQ__Number__c": 4,
+    "SBQQ__LowerBound__c": 1000,
+    "SBQQ__UpperBound__c": null,
+    "SBQQ__Discount__c": 25,
+    "SBQQ__DiscountAmount__c": null,
+    "SBQQ__Price__c": null
+  },
+  {
+    "Id": "a115g0000000005AAA",
+    "Name": "Tier 1",
+    "SBQQ__Schedule__c": "a105g0000000002AAA",
+    "SBQQ__Number__c": 1,
+    "SBQQ__LowerBound__c": 1,
+    "SBQQ__UpperBound__c": 51,
+    "SBQQ__Discount__c": 0,
+    "SBQQ__DiscountAmount__c": null,
+    "SBQQ__Price__c": null
+  },
+  {
+    "Id": "a115g0000000006AAA",
+    "Name": "Tier 2",
+    "SBQQ__Schedule__c": "a105g0000000002AAA",
+    "SBQQ__Number__c": 2,
+    "SBQQ__LowerBound__c": 51,
+    "SBQQ__UpperBound__c": 201,
+    "SBQQ__Discount__c": 8,
+    "SBQQ__DiscountAmount__c": null,
+    "SBQQ__Price__c": null
+  },
+  {
+    "Id": "a115g0000000007AAA",
+    "Name": "Tier 3",
+    "SBQQ__Schedule__c": "a105g0000000002AAA",
+    "SBQQ__Number__c": 3,
+    "SBQQ__LowerBound__c": 201,
+    "SBQQ__UpperBound__c": 1001,
+    "SBQQ__Discount__c": 15,
+    "SBQQ__DiscountAmount__c": null,
+    "SBQQ__Price__c": null
+  },
+  {
+    "Id": "a115g0000000008AAA",
+    "Name": "Tier 4",
+    "SBQQ__Schedule__c": "a105g0000000002AAA",
+    "SBQQ__Number__c": 4,
+    "SBQQ__LowerBound__c": 1001,
+    "SBQQ__UpperBound__c": null,
+    "SBQQ__Discount__c": 22,
+    "SBQQ__DiscountAmount__c": null,
+    "SBQQ__Price__c": null
+  },
+  {
+    "Id": "a115g0000000009AAA",
+    "Name": "Tier 1",
+    "SBQQ__Schedule__c": "a105g0000000003AAA",
+    "SBQQ__Number__c": 1,
+    "SBQQ__LowerBound__c": 1,
+    "SBQQ__UpperBound__c": 10,
+    "SBQQ__Discount__c": 0,
+    "SBQQ__DiscountAmount__c": null,
+    "SBQQ__Price__c": null
+  },
+  {
+    "Id": "a115g0000000010AAA",
+    "Name": "Tier 2",
+    "SBQQ__Schedule__c": "a105g0000000003AAA",
+    "SBQQ__Number__c": 2,
+    "SBQQ__LowerBound__c": 10,
+    "SBQQ__UpperBound__c": null,
+    "SBQQ__Discount__c": 5,
+    "SBQQ__DiscountAmount__c": null,
+    "SBQQ__Price__c": null
+  }
+]

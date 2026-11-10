@@ -1,0 +1,18 @@
+[
+  {
+    "Id": "a375g0000000001AAA",
+    "Name": "Discount",
+    "sbaa__ApprovalRule__c": "a365g0000000001AAA",
+    "sbaa__TestedField__c": "SBQQ__AverageCustomerDiscount__c",
+    "sbaa__Operator__c": "greater than",
+    "sbaa__FilterValue__c": "20"
+  },
+  {
+    "Id": "a375g0000000002AAA",
+    "Name": "Margin",
+    "sbaa__ApprovalRule__c": "a365g0000000002AAA",
+    "sbaa__TestedField__c": "Margin_Percent__c",
+    "sbaa__Operator__c": "less than",
+    "sbaa__FilterValue__c": "40"
+  }
+]

@@ -1,0 +1,16 @@
+[
+  {
+    "Id": "01s5g0000000001AAA",
+    "Name": "Standard Price Book",
+    "IsActive": true,
+    "IsStandard": true,
+    "Description": null
+  },
+  {
+    "Id": "01s5g0000000002AAA",
+    "Name": "USD Direct 2026",
+    "IsActive": true,
+    "IsStandard": false,
+    "Description": "Direct sales list prices, USD"
+  }
+]

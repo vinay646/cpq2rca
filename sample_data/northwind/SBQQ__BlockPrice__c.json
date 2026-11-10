@@ -1,0 +1,38 @@
+[
+  {
+    "Id": "a125g0000000001AAA",
+    "Name": "Storage 1-6 TB",
+    "SBQQ__Product__c": "01t5g0000000010AAA",
+    "SBQQ__PriceBook2__c": "01s5g0000000002AAA",
+    "SBQQ__LowerBound__c": 1,
+    "SBQQ__UpperBound__c": 6,
+    "SBQQ__Price__c": 2000
+  },
+  {
+    "Id": "a125g0000000002AAA",
+    "Name": "Storage 6-11 TB",
+    "SBQQ__Product__c": "01t5g0000000010AAA",
+    "SBQQ__PriceBook2__c": "01s5g0000000002AAA",
+    "SBQQ__LowerBound__c": 6,
+    "SBQQ__UpperBound__c": 11,
+    "SBQQ__Price__c": 3500
+  },
+  {
+    "Id": "a125g0000000003AAA",
+    "Name": "Storage 11-21 TB",
+    "SBQQ__Product__c": "01t5g0000000010AAA",
+    "SBQQ__PriceBook2__c": "01s5g0000000002AAA",
+    "SBQQ__LowerBound__c": 11,
+    "SBQQ__UpperBound__c": 21,
+    "SBQQ__Price__c": 6000
+  },
+  {
+    "Id": "a125g0000000004AAA",
+    "Name": "Storage 21-+ TB",
+    "SBQQ__Product__c": "01t5g0000000010AAA",
+    "SBQQ__PriceBook2__c": "01s5g0000000002AAA",
+    "SBQQ__LowerBound__c": 21,
+    "SBQQ__UpperBound__c": null,
+    "SBQQ__Price__c": 9500
+  }
+]

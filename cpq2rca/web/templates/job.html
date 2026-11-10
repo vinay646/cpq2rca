@@ -1,0 +1,7 @@
+{% extends "base.html" %}{% block body %}
+<h1>Run: {{ name }}</h1>
+{% if not job %}<p>Unknown job.</p>{% else %}
+<p>Status: <b>{{ job.status }}</b>{% if job.error %} - <span class="sev-High">{{ job.error }}</span>{% endif %}</p>
+{% if job.status == 'running' %}<meta http-equiv="refresh" content="2">{% endif %}
+<pre>{{ job.log | join('\n') }}</pre>{% endif %}
+{% endblock %}

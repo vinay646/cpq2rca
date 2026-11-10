@@ -1,0 +1,18 @@
+[
+  {
+    "Id": "a365g0000000001AAA",
+    "Name": "Discount over 20% - Sales Director",
+    "sbaa__Active__c": true,
+    "sbaa__TargetObject__c": "SBQQ__Quote__c",
+    "sbaa__ApprovalStep__c": 1,
+    "sbaa__ConditionsMet__c": "All"
+  },
+  {
+    "Id": "a365g0000000002AAA",
+    "Name": "Margin below 40% - Finance",
+    "sbaa__Active__c": true,
+    "sbaa__TargetObject__c": "SBQQ__Quote__c",
+    "sbaa__ApprovalStep__c": 2,
+    "sbaa__ConditionsMet__c": "All"
+  }
+]

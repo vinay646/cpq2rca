@@ -1,0 +1,92 @@
+[
+  {
+    "Id": "a165g0000000001AAA",
+    "Name": "Licenses",
+    "SBQQ__ConfiguredSKU__c": "01t5g0000000001AAA",
+    "SBQQ__Category__c": null,
+    "SBQQ__Number__c": 10,
+    "SBQQ__MinOptionCount__c": 1,
+    "SBQQ__MaxOptionCount__c": 1
+  },
+  {
+    "Id": "a165g0000000002AAA",
+    "Name": "Add-ons",
+    "SBQQ__ConfiguredSKU__c": "01t5g0000000001AAA",
+    "SBQQ__Category__c": null,
+    "SBQQ__Number__c": 20,
+    "SBQQ__MinOptionCount__c": null,
+    "SBQQ__MaxOptionCount__c": null
+  },
+  {
+    "Id": "a165g0000000003AAA",
+    "Name": "Support",
+    "SBQQ__ConfiguredSKU__c": "01t5g0000000001AAA",
+    "SBQQ__Category__c": null,
+    "SBQQ__Number__c": 30,
+    "SBQQ__MinOptionCount__c": 1,
+    "SBQQ__MaxOptionCount__c": 1
+  },
+  {
+    "Id": "a165g0000000004AAA",
+    "Name": "Services",
+    "SBQQ__ConfiguredSKU__c": "01t5g0000000001AAA",
+    "SBQQ__Category__c": null,
+    "SBQQ__Number__c": 40,
+    "SBQQ__MinOptionCount__c": null,
+    "SBQQ__MaxOptionCount__c": null
+  },
+  {
+    "Id": "a165g0000000005AAA",
+    "Name": "Licenses",
+    "SBQQ__ConfiguredSKU__c": "01t5g0000000002AAA",
+    "SBQQ__Category__c": null,
+    "SBQQ__Number__c": 10,
+    "SBQQ__MinOptionCount__c": 1,
+    "SBQQ__MaxOptionCount__c": 1
+  },
+  {
+    "Id": "a165g0000000006AAA",
+    "Name": "Add-ons",
+    "SBQQ__ConfiguredSKU__c": "01t5g0000000002AAA",
+    "SBQQ__Category__c": null,
+    "SBQQ__Number__c": 20,
+    "SBQQ__MinOptionCount__c": null,
+    "SBQQ__MaxOptionCount__c": null
+  },
+  {
+    "Id": "a165g0000000007AAA",
+    "Name": "Support",
+    "SBQQ__ConfiguredSKU__c": "01t5g0000000002AAA",
+    "SBQQ__Category__c": null,
+    "SBQQ__Number__c": 30,
+    "SBQQ__MinOptionCount__c": 1,
+    "SBQQ__MaxOptionCount__c": 1
+  },
+  {
+    "Id": "a165g0000000008AAA",
+    "Name": "Services",
+    "SBQQ__ConfiguredSKU__c": "01t5g0000000002AAA",
+    "SBQQ__Category__c": null,
+    "SBQQ__Number__c": 40,
+    "SBQQ__MinOptionCount__c": null,
+    "SBQQ__MaxOptionCount__c": null
+  },
+  {
+    "Id": "a165g0000000009AAA",
+    "Name": "Hardware",
+    "SBQQ__ConfiguredSKU__c": "01t5g0000000003AAA",
+    "SBQQ__Category__c": null,
+    "SBQQ__Number__c": 10,
+    "SBQQ__MinOptionCount__c": 1,
+    "SBQQ__MaxOptionCount__c": null
+  },
+  {
+    "Id": "a165g0000000010AAA",
+    "Name": "Accessories",
+    "SBQQ__ConfiguredSKU__c": "01t5g0000000003AAA",
+    "SBQQ__Category__c": null,
+    "SBQQ__Number__c": 20,
+    "SBQQ__MinOptionCount__c": null,
+    "SBQQ__MaxOptionCount__c": null
+  }
+]

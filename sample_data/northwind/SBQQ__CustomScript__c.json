@@ -1,0 +1,10 @@
+[
+  {
+    "Id": "a295g0000000001AAA",
+    "Name": "Northwind QCP",
+    "SBQQ__Code__c": "/**\n * Northwind Quote Calculator Plugin\n */\nexport function onInit(lines, conn) {\n  lines.forEach(function (line) {\n    if (line.record['SBQQ__ProductFamily__c'] === 'Hardware') {\n      line.record['Requires_Shipping__c'] = true;\n    }\n  });\n  return Promise.resolve();\n}\n\nexport function onBeforeCalculate(quote, lines, conn) {\n  var accountId = quote.record['SBQQ__Account__c'];\n  if (!accountId) { return Promise.resolve(); }\n  return conn.query(\"SELECT Id, Strategic_Tier__c FROM Account WHERE Id = '\" + accountId + \"'\")\n    .then(function (res) {\n      var tier = res.records.length ? res.records[0].Strategic_Tier__c : null;\n      quote.record['Strategic_Tier__c'] = tier;\n      if (tier === 'Platinum') {\n        lines.forEach(function (line) {\n          if (line.record['SBQQ__ProductFamily__c'] !== 'Hardware') {\n            line.record['SBQQ__AdditionalDiscount__c'] = Math.max(line.record['SBQQ__AdditionalDiscount__c'] || 0, 5);\n          }\n        });\n      }\n    });\n}\n\nexport function onAfterCalculate(quote, lines, conn) {\n  var margin = 0, total = 0;\n  lines.forEach(function (line) {\n    var cost = (line.record['SBQQ__UnitCost__c'] || 0) * (line.record['SBQQ__Quantity__c'] || 0);\n    total += line.record['SBQQ__NetTotal__c'] || 0;\n    margin += (line.record['SBQQ__NetTotal__c'] || 0) - cost;\n  });\n  quote.record['Margin_Percent__c'] = total ? (margin / total) * 100 : null;\n  return Promise.resolve();\n}\n\nexport function isFieldEditableForObject(fieldName, line, conn, objectName) {\n  if (objectName === 'QuoteLine__c' && fieldName === 'SBQQ__AdditionalDiscount__c') {\n    return line['SBQQ__ProductFamily__c'] !== 'Hardware';\n  }\n  return null;\n}\n",
+    "SBQQ__QuoteFields__c": "SBQQ__Account__c\nStrategic_Tier__c\nMargin_Percent__c",
+    "SBQQ__QuoteLineFields__c": "SBQQ__ProductFamily__c\nSBQQ__UnitCost__c\nRequires_Shipping__c",
+    "SBQQ__GroupFields__c": null
+  }
+]

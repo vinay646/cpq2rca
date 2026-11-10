@@ -1,0 +1,17 @@
+[
+  {
+    "Id": "a345g0000000001AAA",
+    "Name": "Cover Letter",
+    "SBQQ__Type__c": "HTML"
+  },
+  {
+    "Id": "a345g0000000002AAA",
+    "Name": "Line Items",
+    "SBQQ__Type__c": "Line Items"
+  },
+  {
+    "Id": "a345g0000000003AAA",
+    "Name": "Terms & Conditions",
+    "SBQQ__Type__c": "Quote Terms"
+  }
+]

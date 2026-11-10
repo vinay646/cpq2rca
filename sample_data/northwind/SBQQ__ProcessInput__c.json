@@ -1,0 +1,20 @@
+[
+  {
+    "Id": "a325g0000000001AAA",
+    "Name": "Company size",
+    "SBQQ__QuoteProcess__c": "a315g0000000001AAA",
+    "SBQQ__InputField__c": "Company_Size__c",
+    "SBQQ__ProductField__c": "Target_Segment__c",
+    "SBQQ__Operator__c": "equals",
+    "SBQQ__DisplayOrder__c": 10
+  },
+  {
+    "Id": "a325g0000000002AAA",
+    "Name": "Deployment",
+    "SBQQ__QuoteProcess__c": "a315g0000000001AAA",
+    "SBQQ__InputField__c": "Deployment_Type__c",
+    "SBQQ__ProductField__c": "Family",
+    "SBQQ__Operator__c": "equals",
+    "SBQQ__DisplayOrder__c": 20
+  }
+]

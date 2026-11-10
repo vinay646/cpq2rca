@@ -1,0 +1,7 @@
+{% extends "base.html" %}{% block title %}Findings{% endblock %}{% block body %}
+<h1>Findings</h1><div class="sub">Issues to resolve or decide before Phase 2 mapping.</div>
+<div class="tbl"><table><tr><th>Severity</th><th>Area</th><th>Finding</th><th>Recommended action</th></tr>
+{% for f in r.findings %}<tr><td class="sev-{{ f.severity }}">{{ f.severity }}</td><td>{{ f.area }}</td>
+<td><b>{{ f.title }}</b><br><span class="small">{{ f.detail }}</span>{% if f.refs %}<details><summary class="small">References ({{ f.refs|length }})</summary><ul class="small">{% for x in f.refs %}<li>{{ x }}</li>{% endfor %}</ul></details>{% endif %}</td>
+<td class="small">{{ f.action }}</td></tr>{% endfor %}</table></div>
+{% endblock %}

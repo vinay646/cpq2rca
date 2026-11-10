@@ -1,0 +1,27 @@
+{% extends "base.html" %}{% block title %}{{ name }}{% endblock %}{% block body %}
+<h1>{{ s.org.org_name or name }}</h1>
+<div class="sub">Extracted {{ s.extracted_at }} &middot; {{ s.org.org_id }} {% for p in s.org.packages or [] %}&middot; {{ p.name }} {{ p.version }} {% endfor %}</div>
+<div class="grid">
+<div class="card kpi"><div class="l">Complexity</div><div class="v"><span class="pill {{ s.complexity_rating }}" style="font-size:20px">{{ s.complexity_rating }}</span></div></div>
+<div class="card kpi"><div class="l">Config items</div><div class="v">{{ s['items'] }}</div></div>
+<div class="card kpi"><div class="l">CPQ records</div><div class="v">{{ '{:,}'.format(s.total_records) }}</div></div>
+<div class="card kpi"><div class="l">Indicative effort</div><div class="v">{{ s.effort_days }} d</div></div>
+<div class="card kpi"><div class="l">Findings H / M / L</div><div class="v">{{ s.findings.get('High',0) }} / {{ s.findings.get('Medium',0) }} / {{ s.findings.get('Low',0) }}</div></div>
+</div>
+<h2>Migration approach by area</h2>
+<div class="legend">{% for a in ['Direct','Adapt','Redesign','Retire'] %}<span><i class="{{ a }}"></i>{{ a }} ({{ s.by_approach[a] }})</span>{% endfor %}</div>
+<div class="tbl"><table><tr><th>Area</th><th>Items</th><th style="width:40%">Approach mix</th><th>Effort (h)</th></tr>
+{% for cat, d in s.by_category.items() %}<tr><td><a href="{{ url_for('items', name=name, category=cat) }}">{{ cat }}</a></td><td>{{ d['items'] }}</td>
+<td><div class="bar">{% for a in ['Direct','Adapt','Redesign','Retire'] %}{% if d[a] %}<span class="{{ a }}" title="{{ a }}: {{ d[a] }}" style="width:{{ 100*d[a]/d['items'] }}%"></span>{% endif %}{% endfor %}</div></td>
+<td>{{ '%.0f'|format(d.hours) }}</td></tr>{% endfor %}</table></div>
+<div class="two" style="margin-top:8px"><div>
+<h2>Top findings</h2><div class="tbl"><table><tr><th>Severity</th><th>Finding</th><th>Action</th></tr>
+{% for f in r.findings[:6] %}<tr><td class="sev-{{ f.severity }}">{{ f.severity }}</td><td>{{ f.title }}</td><td class="small">{{ f.action }}</td></tr>{% endfor %}</table></div>
+<p><a href="{{ url_for('findings', name=name) }}">All {{ r.findings|length }} findings &rarr;</a></p></div>
+<div><h2>Deliverables</h2><div class="card">
+{% for f in files|sort %}<p><a class="btn {{ 'alt' if f.endswith('xlsx') }}" href="{{ url_for('download', name=name, fname=f) }}">{{ f }}</a></p>{% endfor %}
+<p><a href="{{ url_for('download', name=name, fname='extract.zip') }}">JSON extract (zip)</a> &middot; <a href="{{ url_for('download', name=name, fname='analysis.json') }}">analysis.json</a></p></div>
+{% set tx = s.transactions %}{% if tx %}<h2>Transactional data</h2><table><tr><th>Object</th><th>Records</th></tr>
+{% for k, v in tx.items() if v %}<tr><td>{{ BY_NAME[k].label }}</td><td>{{ '{:,}'.format(v) }}</td></tr>{% endfor %}</table>{% endif %}
+</div></div>
+{% endblock %}

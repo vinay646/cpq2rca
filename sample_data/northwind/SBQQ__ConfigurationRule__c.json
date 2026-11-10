@@ -1,0 +1,42 @@
+[
+  {
+    "Id": "a235g0000000001AAA",
+    "Name": "BND-ENT rule",
+    "SBQQ__Product__c": "01t5g0000000002AAA",
+    "SBQQ__ProductRule__c": "a215g0000000001AAA",
+    "SBQQ__ProductFeature__c": null,
+    "SBQQ__Active__c": true
+  },
+  {
+    "Id": "a235g0000000002AAA",
+    "Name": "BND-ENT rule",
+    "SBQQ__Product__c": "01t5g0000000002AAA",
+    "SBQQ__ProductRule__c": "a215g0000000003AAA",
+    "SBQQ__ProductFeature__c": "a165g0000000007AAA",
+    "SBQQ__Active__c": true
+  },
+  {
+    "Id": "a235g0000000003AAA",
+    "Name": "BND-EDGE rule",
+    "SBQQ__Product__c": "01t5g0000000003AAA",
+    "SBQQ__ProductRule__c": "a215g0000000004AAA",
+    "SBQQ__ProductFeature__c": null,
+    "SBQQ__Active__c": true
+  },
+  {
+    "Id": "a235g0000000004AAA",
+    "Name": "BND-ENT rule",
+    "SBQQ__Product__c": "01t5g0000000002AAA",
+    "SBQQ__ProductRule__c": "a215g0000000005AAA",
+    "SBQQ__ProductFeature__c": "a165g0000000006AAA",
+    "SBQQ__Active__c": true
+  },
+  {
+    "Id": "a235g0000000005AAA",
+    "Name": "BND-ENT rule",
+    "SBQQ__Product__c": "01t5g0000000002AAA",
+    "SBQQ__ProductRule__c": "a215g0000000009AAA",
+    "SBQQ__ProductFeature__c": null,
+    "SBQQ__Active__c": true
+  }
+]

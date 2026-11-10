@@ -1,0 +1,80 @@
+[
+  {
+    "Id": "a285g0000000001AAA",
+    "Name": "SBQQ__SpecialPrice__c",
+    "SBQQ__Rule__c": "a265g0000000001AAA",
+    "SBQQ__TargetObject__c": "Quote Line",
+    "SBQQ__Field__c": "SBQQ__SpecialPrice__c",
+    "SBQQ__Value__c": null,
+    "SBQQ__ValueField__c": null,
+    "SBQQ__Formula__c": "MAX(5000, Total_Users__c * 25)",
+    "SBQQ__SourceVariable__c": null,
+    "SBQQ__SourceLookupField__c": null,
+    "SBQQ__Order__c": 1
+  },
+  {
+    "Id": "a285g0000000002AAA",
+    "Name": "SBQQ__AdditionalDiscount__c",
+    "SBQQ__Rule__c": "a265g0000000002AAA",
+    "SBQQ__TargetObject__c": "Quote Line",
+    "SBQQ__Field__c": "SBQQ__AdditionalDiscount__c",
+    "SBQQ__Value__c": "20",
+    "SBQQ__ValueField__c": null,
+    "SBQQ__Formula__c": null,
+    "SBQQ__SourceVariable__c": null,
+    "SBQQ__SourceLookupField__c": null,
+    "SBQQ__Order__c": 1
+  },
+  {
+    "Id": "a285g0000000003AAA",
+    "Name": "Uplift_Percent__c",
+    "SBQQ__Rule__c": "a265g0000000003AAA",
+    "SBQQ__TargetObject__c": "Quote Line",
+    "SBQQ__Field__c": "Uplift_Percent__c",
+    "SBQQ__Value__c": null,
+    "SBQQ__ValueField__c": null,
+    "SBQQ__Formula__c": null,
+    "SBQQ__SourceVariable__c": null,
+    "SBQQ__SourceLookupField__c": "Uplift_Percent__c",
+    "SBQQ__Order__c": 1
+  },
+  {
+    "Id": "a285g0000000004AAA",
+    "Name": "SBQQ__Quantity__c",
+    "SBQQ__Rule__c": "a265g0000000004AAA",
+    "SBQQ__TargetObject__c": "Product Option",
+    "SBQQ__Field__c": "SBQQ__Quantity__c",
+    "SBQQ__Value__c": null,
+    "SBQQ__ValueField__c": null,
+    "SBQQ__Formula__c": "CEILING(Configured_Users__c / 100)",
+    "SBQQ__SourceVariable__c": null,
+    "SBQQ__SourceLookupField__c": null,
+    "SBQQ__Order__c": 1
+  },
+  {
+    "Id": "a285g0000000005AAA",
+    "Name": "Freight_Amount__c",
+    "SBQQ__Rule__c": "a265g0000000005AAA",
+    "SBQQ__TargetObject__c": "Quote",
+    "SBQQ__Field__c": "Freight_Amount__c",
+    "SBQQ__Value__c": null,
+    "SBQQ__ValueField__c": null,
+    "SBQQ__Formula__c": "Hardware_Units__c * 45",
+    "SBQQ__SourceVariable__c": "a205g0000000002AAA",
+    "SBQQ__SourceLookupField__c": null,
+    "SBQQ__Order__c": 1
+  },
+  {
+    "Id": "a285g0000000006AAA",
+    "Name": "SBQQ__AdditionalDiscount__c",
+    "SBQQ__Rule__c": "a265g0000000006AAA",
+    "SBQQ__TargetObject__c": "Quote Line",
+    "SBQQ__Field__c": "SBQQ__AdditionalDiscount__c",
+    "SBQQ__Value__c": "15",
+    "SBQQ__ValueField__c": null,
+    "SBQQ__Formula__c": null,
+    "SBQQ__SourceVariable__c": null,
+    "SBQQ__SourceLookupField__c": null,
+    "SBQQ__Order__c": 1
+  }
+]

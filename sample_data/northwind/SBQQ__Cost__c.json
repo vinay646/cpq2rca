@@ -1,0 +1,23 @@
+[
+  {
+    "Id": "a145g0000000001AAA",
+    "Name": "Cost HW-EDGE",
+    "SBQQ__Product__c": "01t5g0000000015AAA",
+    "SBQQ__UnitCost__c": 5200,
+    "SBQQ__Active__c": true
+  },
+  {
+    "Id": "a145g0000000002AAA",
+    "Name": "Cost HW-RACK",
+    "SBQQ__Product__c": "01t5g0000000016AAA",
+    "SBQQ__UnitCost__c": 120,
+    "SBQQ__Active__c": true
+  },
+  {
+    "Id": "a145g0000000003AAA",
+    "Name": "Cost HW-PSU",
+    "SBQQ__Product__c": "01t5g0000000017AAA",
+    "SBQQ__UnitCost__c": 210,
+    "SBQQ__Active__c": true
+  }
+]

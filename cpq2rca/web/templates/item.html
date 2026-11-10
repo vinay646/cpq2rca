@@ -1,0 +1,24 @@
+{% extends "base.html" %}{% block title %}{{ it.name }}{% endblock %}{% block body %}
+<p class="small"><a href="{{ url_for('items', name=name, category=it.category) }}">&larr; {{ it.category }}</a></p>
+<h1>{{ it.name }}</h1>
+<div class="sub">{{ it.type }} &middot; {{ 'Active' if it.active else 'Inactive' }} &middot; <span class="pill {{ it.approach }}">{{ it.approach }}</span> &middot; score {{ it.score }} &middot; ~{{ '%.1f'|format(it.effort_hours) }} h</div>
+<div class="two"><div class="card">
+<p><span class="lbl">Purpose:</span> {{ it.summary }}</p>
+{% if it.when %}<p><span class="lbl">When it runs:</span> {{ it.when }}</p>{% endif %}
+{% if it.applies_to %}<p><span class="lbl">Applies to:</span> {{ it.applies_to|join(', ') }}</p>{% endif %}
+{% if it.conditions %}<p><span class="lbl">Conditions:</span> {{ it.logic }}</p><ul>{% for c in it.conditions %}<li>{{ c }}</li>{% endfor %}</ul>{% endif %}
+{% if it.actions %}<p class="lbl">What it does</p><ul>{% for a in it.actions %}<li>{{ a }}</li>{% endfor %}</ul>{% endif %}
+{% if it.details %}<p class="lbl">Details</p><ul>{% for d in it.details %}<li style="{{ 'margin-left:18px;list-style:circle' if d.startswith('    ') }}">{{ d.strip().lstrip('- ') }}</li>{% endfor %}</ul>{% endif %}
+{% if it.example %}<div class="ex">{{ it.example }}</div>{% endif %}
+{% if it.qcp %}<p class="lbl">Plugin analysis</p><p class="small">Hooks: {{ it.qcp.hooks|join(', ') }} &middot; {{ it.qcp.loc }} lines &middot; queries: {{ it.qcp.queries|length }}</p>{% endif %}
+</div><div>
+<div class="card"><p class="lbl" style="margin-top:0">Suggested RCA target</p><p>{{ it.rca_target }}</p>
+{% if it.notes %}<p class="lbl">Migration notes</p><ul>{% for n in it.notes %}<li>{{ n }}</li>{% endfor %}</ul>{% endif %}
+{% if it.custom_fields %}<p class="lbl">Custom fields</p><p class="small">{{ it.custom_fields|join(', ') }}</p>{% endif %}</div>
+<div class="card" style="margin-top:14px"><p class="lbl" style="margin-top:0">Depends on</p><ul>
+{% for d in it.dependencies %}<li>{% if d.id in by_id %}<a href="{{ url_for('item', name=name, item_id=d.id) }}">{{ d.name }}</a>{% else %}{{ d.name }}{% endif %} <span class="small muted">{{ d.relation }}</span></li>{% else %}<li class="muted">None</li>{% endfor %}</ul>
+<p class="lbl">Used by</p><ul>{% for u in it.used_by %}<li><a href="{{ url_for('item', name=name, item_id=u) }}">{{ by_id[u].name }}</a></li>{% else %}<li class="muted">None</li>{% endfor %}</ul></div>
+</div></div>
+<h2>Source records ({{ raw|length }})</h2>
+<details><summary class="small">Show extracted JSON</summary>{% for o, rec in raw %}<p class="small"><b>{{ o }}</b> {{ rec.Id }}</p><pre>{{ rec|tojson(indent=2) }}</pre>{% endfor %}</details>
+{% endblock %}

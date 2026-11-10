@@ -1,0 +1,65 @@
+name: CPQ Assessment (live org)
+
+# Manually run against a client CPQ org. Requires a repository or environment
+# secret holding a Salesforce SFDX auth URL for that org (read-only user).
+on:
+  workflow_dispatch:
+    inputs:
+      run_name:
+        description: "Run name (e.g. acme-sandbox-2026-11)"
+        required: true
+      auth_secret:
+        description: "Name of the secret that holds the SFDX auth URL"
+        required: true
+        default: SFDX_AUTH_URL
+      ai:
+        description: "Polish explanations with Claude (needs ANTHROPIC_API_KEY secret)"
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+jobs:
+  assess:
+    runs-on: ubuntu-latest
+    environment: cpq-clients
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - name: Install tool and Salesforce CLI
+        run: |
+          pip install -e .
+          npm install --global @salesforce/cli
+      - name: Authenticate to org
+        env:
+          AUTH_URL: ${{ secrets[inputs.auth_secret] }}
+        run: |
+          if [ -z "$AUTH_URL" ]; then echo "Secret '${{ inputs.auth_secret }}' is empty or missing"; exit 1; fi
+          echo "$AUTH_URL" > auth.txt
+          sf org login sfdx-url --sfdx-url-file auth.txt --alias cpq-source
+          rm -f auth.txt
+      - name: Extract, explain and assess
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          CPQ2RCA_AI_MODEL: ${{ vars.CPQ2RCA_AI_MODEL }}
+        run: |
+          AI_FLAG=""
+          if [ "${{ inputs.ai }}" = "true" ]; then AI_FLAG="--ai"; fi
+          cpq2rca run --source sf:cpq-source --out "runs/${{ inputs.run_name }}" $AI_FLAG
+      - name: Upload deliverables
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ inputs.run_name }}
+          retention-days: 14
+          path: runs/${{ inputs.run_name }}
+      - name: Log out
+        if: always()
+        run: sf org logout --target-org cpq-source --no-prompt || true

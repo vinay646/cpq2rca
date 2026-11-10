@@ -1,0 +1,32 @@
+[
+  {
+    "Id": "a135g0000000001AAA",
+    "Name": "CP-LIC-CORE",
+    "SBQQ__Account__c": "0015g0000000001AAA",
+    "SBQQ__Product__c": "01t5g0000000004AAA",
+    "SBQQ__Price__c": 1000,
+    "SBQQ__Discount__c": null,
+    "SBQQ__EffectiveDate__c": "2026-01-01",
+    "SBQQ__ExpirationDate__c": "2026-12-31"
+  },
+  {
+    "Id": "a135g0000000002AAA",
+    "Name": "CP-ADD-ANL",
+    "SBQQ__Account__c": "0015g0000000002AAA",
+    "SBQQ__Product__c": "01t5g0000000005AAA",
+    "SBQQ__Price__c": 250,
+    "SBQQ__Discount__c": null,
+    "SBQQ__EffectiveDate__c": "2026-01-01",
+    "SBQQ__ExpirationDate__c": "2026-12-31"
+  },
+  {
+    "Id": "a135g0000000003AAA",
+    "Name": "CP-HW-EDGE",
+    "SBQQ__Account__c": "0015g0000000003AAA",
+    "SBQQ__Product__c": "01t5g0000000015AAA",
+    "SBQQ__Price__c": 7900,
+    "SBQQ__Discount__c": null,
+    "SBQQ__EffectiveDate__c": "2026-01-01",
+    "SBQQ__ExpirationDate__c": "2026-12-31"
+  }
+]

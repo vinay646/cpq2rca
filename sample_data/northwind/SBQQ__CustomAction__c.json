@@ -1,0 +1,20 @@
+[
+  {
+    "Id": "a305g0000000001AAA",
+    "Name": "Apply Partner Discount",
+    "SBQQ__Active__c": true,
+    "SBQQ__Location__c": "Line Editor",
+    "SBQQ__Type__c": "Button",
+    "SBQQ__DisplayOrder__c": 10,
+    "SBQQ__URLTarget__c": null
+  },
+  {
+    "Id": "a305g0000000002AAA",
+    "Name": "Open Margin Calculator",
+    "SBQQ__Active__c": true,
+    "SBQQ__Location__c": "Quote",
+    "SBQQ__Type__c": "URL",
+    "SBQQ__DisplayOrder__c": 20,
+    "SBQQ__URLTarget__c": "New Window"
+  }
+]

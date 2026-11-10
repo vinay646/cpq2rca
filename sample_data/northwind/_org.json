@@ -1,0 +1,18 @@
+{
+  "org_id": "00D5g0000000NWCAA2",
+  "org_name": "Northwind Cloud (synthetic demo)",
+  "edition": "Enterprise Edition",
+  "is_sandbox": true,
+  "packages": [
+    {
+      "namespace": "SBQQ",
+      "name": "Salesforce CPQ",
+      "version": "250.4"
+    },
+    {
+      "namespace": "sbaa",
+      "name": "Advanced Approvals",
+      "version": "250.1"
+    }
+  ]
+}

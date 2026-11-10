@@ -1,0 +1,47 @@
+[
+  {
+    "Id": "a185g0000000001AAA",
+    "Name": "BND-PRO support exclusive",
+    "SBQQ__ConfiguredSKU__c": "01t5g0000000001AAA",
+    "SBQQ__ConstrainingOption__c": "a175g0000000007AAA",
+    "SBQQ__ConstrainedOption__c": "a175g0000000006AAA",
+    "SBQQ__Type__c": "Exclusion",
+    "SBQQ__Active__c": true
+  },
+  {
+    "Id": "a185g0000000002AAA",
+    "Name": "BND-PRO AI needs Analytics",
+    "SBQQ__ConfiguredSKU__c": "01t5g0000000001AAA",
+    "SBQQ__ConstrainingOption__c": "a175g0000000002AAA",
+    "SBQQ__ConstrainedOption__c": "a175g0000000003AAA",
+    "SBQQ__Type__c": "Dependency",
+    "SBQQ__Active__c": true
+  },
+  {
+    "Id": "a185g0000000003AAA",
+    "Name": "BND-ENT support exclusive",
+    "SBQQ__ConfiguredSKU__c": "01t5g0000000002AAA",
+    "SBQQ__ConstrainingOption__c": "a175g0000000016AAA",
+    "SBQQ__ConstrainedOption__c": "a175g0000000015AAA",
+    "SBQQ__Type__c": "Exclusion",
+    "SBQQ__Active__c": true
+  },
+  {
+    "Id": "a185g0000000004AAA",
+    "Name": "BND-ENT AI needs Analytics",
+    "SBQQ__ConfiguredSKU__c": "01t5g0000000002AAA",
+    "SBQQ__ConstrainingOption__c": "a175g0000000011AAA",
+    "SBQQ__ConstrainedOption__c": "a175g0000000012AAA",
+    "SBQQ__Type__c": "Dependency",
+    "SBQQ__Active__c": true
+  },
+  {
+    "Id": "a185g0000000005AAA",
+    "Name": "Rack kit needs appliance",
+    "SBQQ__ConfiguredSKU__c": "01t5g0000000003AAA",
+    "SBQQ__ConstrainingOption__c": "a175g0000000022AAA",
+    "SBQQ__ConstrainedOption__c": "a175g0000000023AAA",
+    "SBQQ__Type__c": "Dependency",
+    "SBQQ__Active__c": true
+  }
+]

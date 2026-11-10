@@ -1,0 +1,22 @@
+[
+  {
+    "Id": "a195g0000000001AAA",
+    "Name": "Deployment Region",
+    "SBQQ__Product__c": "01t5g0000000002AAA",
+    "SBQQ__Feature__c": "a165g0000000005AAA",
+    "SBQQ__TargetField__c": "Deployment_Region__c",
+    "SBQQ__Required__c": true,
+    "SBQQ__AppliedImmediately__c": true,
+    "SBQQ__DefaultField__c": null
+  },
+  {
+    "Id": "a195g0000000002AAA",
+    "Name": "Contract Term (months)",
+    "SBQQ__Product__c": "01t5g0000000001AAA",
+    "SBQQ__Feature__c": "a165g0000000001AAA",
+    "SBQQ__TargetField__c": "SBQQ__SubscriptionTerm__c",
+    "SBQQ__Required__c": false,
+    "SBQQ__AppliedImmediately__c": false,
+    "SBQQ__DefaultField__c": "SBQQ__SubscriptionTerm__c"
+  }
+]

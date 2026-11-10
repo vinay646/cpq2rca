@@ -1,0 +1,80 @@
+[
+  {
+    "Id": "a265g0000000001AAA",
+    "Name": "Implementation fee scales with users",
+    "SBQQ__Active__c": true,
+    "SBQQ__TargetObject__c": "Calculator",
+    "SBQQ__EvaluationEvent__c": "On Calculate",
+    "SBQQ__ConfiguratorEvaluationEvent__c": null,
+    "SBQQ__EvaluationOrder__c": 20,
+    "SBQQ__ConditionsMet__c": "All",
+    "SBQQ__AdvancedCondition__c": null,
+    "SBQQ__Product__c": null,
+    "SBQQ__LookupObject__c": null
+  },
+  {
+    "Id": "a265g0000000002AAA",
+    "Name": "Education sector discount",
+    "SBQQ__Active__c": true,
+    "SBQQ__TargetObject__c": "Calculator",
+    "SBQQ__EvaluationEvent__c": "Before Calculate",
+    "SBQQ__ConfiguratorEvaluationEvent__c": null,
+    "SBQQ__EvaluationOrder__c": 10,
+    "SBQQ__ConditionsMet__c": "All",
+    "SBQQ__AdvancedCondition__c": null,
+    "SBQQ__Product__c": null,
+    "SBQQ__LookupObject__c": null
+  },
+  {
+    "Id": "a265g0000000003AAA",
+    "Name": "Regional price uplift",
+    "SBQQ__Active__c": true,
+    "SBQQ__TargetObject__c": "Calculator",
+    "SBQQ__EvaluationEvent__c": "On Calculate",
+    "SBQQ__ConfiguratorEvaluationEvent__c": null,
+    "SBQQ__EvaluationOrder__c": 20,
+    "SBQQ__ConditionsMet__c": "All",
+    "SBQQ__AdvancedCondition__c": null,
+    "SBQQ__Product__c": null,
+    "SBQQ__LookupObject__c": "Regional_Uplift__c"
+  },
+  {
+    "Id": "a265g0000000004AAA",
+    "Name": "Default storage from configured users",
+    "SBQQ__Active__c": true,
+    "SBQQ__TargetObject__c": "Configurator",
+    "SBQQ__EvaluationEvent__c": null,
+    "SBQQ__ConfiguratorEvaluationEvent__c": "Save",
+    "SBQQ__EvaluationOrder__c": 5,
+    "SBQQ__ConditionsMet__c": "All",
+    "SBQQ__AdvancedCondition__c": null,
+    "SBQQ__Product__c": "01t5g0000000002AAA",
+    "SBQQ__LookupObject__c": null
+  },
+  {
+    "Id": "a265g0000000005AAA",
+    "Name": "Hardware freight charge",
+    "SBQQ__Active__c": true,
+    "SBQQ__TargetObject__c": "Calculator",
+    "SBQQ__EvaluationEvent__c": "After Calculate",
+    "SBQQ__ConfiguratorEvaluationEvent__c": null,
+    "SBQQ__EvaluationOrder__c": 30,
+    "SBQQ__ConditionsMet__c": "All",
+    "SBQQ__AdvancedCondition__c": null,
+    "SBQQ__Product__c": null,
+    "SBQQ__LookupObject__c": null
+  },
+  {
+    "Id": "a265g0000000006AAA",
+    "Name": "Education sector discount (old)",
+    "SBQQ__Active__c": false,
+    "SBQQ__TargetObject__c": "Calculator",
+    "SBQQ__EvaluationEvent__c": "Before Calculate",
+    "SBQQ__ConfiguratorEvaluationEvent__c": null,
+    "SBQQ__EvaluationOrder__c": 10,
+    "SBQQ__ConditionsMet__c": "All",
+    "SBQQ__AdvancedCondition__c": null,
+    "SBQQ__Product__c": null,
+    "SBQQ__LookupObject__c": null
+  }
+]

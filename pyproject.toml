@@ -1,0 +1,23 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "cpq2rca"
+version = "0.1.0"
+description = "Salesforce CPQ to Revenue Cloud Advanced migration tool - Phase 1: extract, explain, assess"
+authors = [{ name = "Streamforce Solutions" }]
+requires-python = ">=3.10"
+dependencies = ["requests>=2.31", "networkx>=3.0", "python-docx>=1.1", "openpyxl>=3.1", "Flask>=3.0", "Pillow>=10"]
+
+[project.optional-dependencies]
+dev = ["pytest>=8"]
+
+[project.scripts]
+cpq2rca = "cpq2rca.cli:main"
+
+[tool.setuptools.packages.find]
+include = ["cpq2rca*"]
+
+[tool.setuptools.package-data]
+cpq2rca = ["web/templates/*.html", "web/static/*"]

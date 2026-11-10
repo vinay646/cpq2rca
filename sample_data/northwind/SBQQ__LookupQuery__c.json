@@ -1,0 +1,35 @@
+[
+  {
+    "Id": "a255g0000000001AAA",
+    "Name": "Region match",
+    "SBQQ__ProductRule__c": "a215g0000000009AAA",
+    "SBQQ__PriceRule2__c": null,
+    "SBQQ__TestedField__c": "Deployment_Region__c",
+    "SBQQ__TestedValue__c": null,
+    "SBQQ__Operator__c": "equals",
+    "SBQQ__LookupField__c": "Region__c",
+    "SBQQ__MatchType__c": "Field Value"
+  },
+  {
+    "Id": "a255g0000000002AAA",
+    "Name": "Region",
+    "SBQQ__ProductRule__c": null,
+    "SBQQ__PriceRule2__c": "a265g0000000003AAA",
+    "SBQQ__TestedField__c": "Deployment_Region__c",
+    "SBQQ__TestedValue__c": null,
+    "SBQQ__Operator__c": "equals",
+    "SBQQ__LookupField__c": "Region__c",
+    "SBQQ__MatchType__c": "Field Value"
+  },
+  {
+    "Id": "a255g0000000003AAA",
+    "Name": "Family",
+    "SBQQ__ProductRule__c": null,
+    "SBQQ__PriceRule2__c": "a265g0000000003AAA",
+    "SBQQ__TestedField__c": "SBQQ__ProductFamily__c",
+    "SBQQ__TestedValue__c": null,
+    "SBQQ__Operator__c": "equals",
+    "SBQQ__LookupField__c": "Product_Family__c",
+    "SBQQ__MatchType__c": "Field Value"
+  }
+]

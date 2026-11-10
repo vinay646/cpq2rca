@@ -1,0 +1,290 @@
+[
+  {
+    "Id": "01u5g0000000001AAA",
+    "Name": "Cloud Platform - Professional",
+    "Pricebook2Id": "01s5g0000000001AAA",
+    "Product2Id": "01t5g0000000001AAA",
+    "UnitPrice": 0,
+    "IsActive": true
+  },
+  {
+    "Id": "01u5g0000000002AAA",
+    "Name": "Cloud Platform - Professional",
+    "Pricebook2Id": "01s5g0000000002AAA",
+    "Product2Id": "01t5g0000000001AAA",
+    "UnitPrice": 0,
+    "IsActive": true
+  },
+  {
+    "Id": "01u5g0000000003AAA",
+    "Name": "Cloud Platform - Enterprise",
+    "Pricebook2Id": "01s5g0000000001AAA",
+    "Product2Id": "01t5g0000000002AAA",
+    "UnitPrice": 0,
+    "IsActive": true
+  },
+  {
+    "Id": "01u5g0000000004AAA",
+    "Name": "Cloud Platform - Enterprise",
+    "Pricebook2Id": "01s5g0000000002AAA",
+    "Product2Id": "01t5g0000000002AAA",
+    "UnitPrice": 0,
+    "IsActive": true
+  },
+  {
+    "Id": "01u5g0000000005AAA",
+    "Name": "Edge Appliance Kit",
+    "Pricebook2Id": "01s5g0000000001AAA",
+    "Product2Id": "01t5g0000000003AAA",
+    "UnitPrice": 0,
+    "IsActive": true
+  },
+  {
+    "Id": "01u5g0000000006AAA",
+    "Name": "Edge Appliance Kit",
+    "Pricebook2Id": "01s5g0000000002AAA",
+    "Product2Id": "01t5g0000000003AAA",
+    "UnitPrice": 0,
+    "IsActive": true
+  },
+  {
+    "Id": "01u5g0000000007AAA",
+    "Name": "Core Platform License (per user)",
+    "Pricebook2Id": "01s5g0000000001AAA",
+    "Product2Id": "01t5g0000000004AAA",
+    "UnitPrice": 1200,
+    "IsActive": true
+  },
+  {
+    "Id": "01u5g0000000008AAA",
+    "Name": "Core Platform License (per user)",
+    "Pricebook2Id": "01s5g0000000002AAA",
+    "Product2Id": "01t5g0000000004AAA",
+    "UnitPrice": 1200,
+    "IsActive": true
+  },
+  {
+    "Id": "01u5g0000000009AAA",
+    "Name": "Analytics Add-on",
+    "Pricebook2Id": "01s5g0000000001AAA",
+    "Product2Id": "01t5g0000000005AAA",
+    "UnitPrice": 300,
+    "IsActive": true
+  },
+  {
+    "Id": "01u5g0000000010AAA",
+    "Name": "Analytics Add-on",
+    "Pricebook2Id": "01s5g0000000002AAA",
+    "Product2Id": "01t5g0000000005AAA",
+    "UnitPrice": 300,
+    "IsActive": true
+  },
+  {
+    "Id": "01u5g0000000011AAA",
+    "Name": "AI Assistant",
+    "Pricebook2Id": "01s5g0000000001AAA",
+    "Product2Id": "01t5g0000000006AAA",
+    "UnitPrice": 450,
+    "IsActive": true
+  },
+  {
+    "Id": "01u5g0000000012AAA",
+    "Name": "AI Assistant",
+    "Pricebook2Id": "01s5g0000000002AAA",
+    "Product2Id": "01t5g0000000006AAA",
+    "UnitPrice": 450,
+    "IsActive": true
+  },
+  {
+    "Id": "01u5g0000000013AAA",
+    "Name": "SSO Connector",
+    "Pricebook2Id": "01s5g0000000001AAA",
+    "Product2Id": "01t5g0000000007AAA",
+    "UnitPrice": 5000,
+    "IsActive": true
+  },
+  {
+    "Id": "01u5g0000000014AAA",
+    "Name": "SSO Connector",
+    "Pricebook2Id": "01s5g0000000002AAA",
+    "Product2Id": "01t5g0000000007AAA",
+    "UnitPrice": 5000,
+    "IsActive": true
+  },
+  {
+    "Id": "01u5g0000000015AAA",
+    "Name": "Full Sandbox Environment",
+    "Pricebook2Id": "01s5g0000000001AAA",
+    "Product2Id": "01t5g0000000008AAA",
+    "UnitPrice": 15000,
+    "IsActive": true
+  },
+  {
+    "Id": "01u5g0000000016AAA",
+    "Name": "Full Sandbox Environment",
+    "Pricebook2Id": "01s5g0000000002AAA",
+    "Product2Id": "01t5g0000000008AAA",
+    "UnitPrice": 15000,
+    "IsActive": true
+  },
+  {
+    "Id": "01u5g0000000017AAA",
+    "Name": "API Calls Pack (10k)",
+    "Pricebook2Id": "01s5g0000000001AAA",
+    "Product2Id": "01t5g0000000009AAA",
+    "UnitPrice": 100,
+    "IsActive": true
+  },
+  {
+    "Id": "01u5g0000000018AAA",
+    "Name": "API Calls Pack (10k)",
+    "Pricebook2Id": "01s5g0000000002AAA",
+    "Product2Id": "01t5g0000000009AAA",
+    "UnitPrice": 100,
+    "IsActive": true
+  },
+  {
+    "Id": "01u5g0000000019AAA",
+    "Name": "Data Storage (TB)",
+    "Pricebook2Id": "01s5g0000000001AAA",
+    "Product2Id": "01t5g0000000010AAA",
+    "UnitPrice": 0,
+    "IsActive": true
+  },
+  {
+    "Id": "01u5g0000000020AAA",
+    "Name": "Data Storage (TB)",
+    "Pricebook2Id": "01s5g0000000002AAA",
+    "Product2Id": "01t5g0000000010AAA",
+    "UnitPrice": 0,
+    "IsActive": true
+  },
+  {
+    "Id": "01u5g0000000021AAA",
+    "Name": "Standard Support",
+    "Pricebook2Id": "01s5g0000000001AAA",
+    "Product2Id": "01t5g0000000011AAA",
+    "UnitPrice": 0,
+    "IsActive": true
+  },
+  {
+    "Id": "01u5g0000000022AAA",
+    "Name": "Standard Support",
+    "Pricebook2Id": "01s5g0000000002AAA",
+    "Product2Id": "01t5g0000000011AAA",
+    "UnitPrice": 0,
+    "IsActive": true
+  },
+  {
+    "Id": "01u5g0000000023AAA",
+    "Name": "Premium Support",
+    "Pricebook2Id": "01s5g0000000001AAA",
+    "Product2Id": "01t5g0000000012AAA",
+    "UnitPrice": 0,
+    "IsActive": true
+  },
+  {
+    "Id": "01u5g0000000024AAA",
+    "Name": "Premium Support",
+    "Pricebook2Id": "01s5g0000000002AAA",
+    "Product2Id": "01t5g0000000012AAA",
+    "UnitPrice": 0,
+    "IsActive": true
+  },
+  {
+    "Id": "01u5g0000000025AAA",
+    "Name": "Implementation Services",
+    "Pricebook2Id": "01s5g0000000001AAA",
+    "Product2Id": "01t5g0000000013AAA",
+    "UnitPrice": 5000,
+    "IsActive": true
+  },
+  {
+    "Id": "01u5g0000000026AAA",
+    "Name": "Implementation Services",
+    "Pricebook2Id": "01s5g0000000002AAA",
+    "Product2Id": "01t5g0000000013AAA",
+    "UnitPrice": 5000,
+    "IsActive": true
+  },
+  {
+    "Id": "01u5g0000000027AAA",
+    "Name": "Training Day",
+    "Pricebook2Id": "01s5g0000000001AAA",
+    "Product2Id": "01t5g0000000014AAA",
+    "UnitPrice": 2500,
+    "IsActive": true
+  },
+  {
+    "Id": "01u5g0000000028AAA",
+    "Name": "Training Day",
+    "Pricebook2Id": "01s5g0000000002AAA",
+    "Product2Id": "01t5g0000000014AAA",
+    "UnitPrice": 2500,
+    "IsActive": true
+  },
+  {
+    "Id": "01u5g0000000029AAA",
+    "Name": "Edge Appliance E200",
+    "Pricebook2Id": "01s5g0000000001AAA",
+    "Product2Id": "01t5g0000000015AAA",
+    "UnitPrice": 8900,
+    "IsActive": true
+  },
+  {
+    "Id": "01u5g0000000030AAA",
+    "Name": "Edge Appliance E200",
+    "Pricebook2Id": "01s5g0000000002AAA",
+    "Product2Id": "01t5g0000000015AAA",
+    "UnitPrice": 8900,
+    "IsActive": true
+  },
+  {
+    "Id": "01u5g0000000031AAA",
+    "Name": "Rack Mount Kit",
+    "Pricebook2Id": "01s5g0000000001AAA",
+    "Product2Id": "01t5g0000000016AAA",
+    "UnitPrice": 350,
+    "IsActive": true
+  },
+  {
+    "Id": "01u5g0000000032AAA",
+    "Name": "Rack Mount Kit",
+    "Pricebook2Id": "01s5g0000000002AAA",
+    "Product2Id": "01t5g0000000016AAA",
+    "UnitPrice": 350,
+    "IsActive": true
+  },
+  {
+    "Id": "01u5g0000000033AAA",
+    "Name": "Redundant Power Supply",
+    "Pricebook2Id": "01s5g0000000001AAA",
+    "Product2Id": "01t5g0000000017AAA",
+    "UnitPrice": 600,
+    "IsActive": true
+  },
+  {
+    "Id": "01u5g0000000034AAA",
+    "Name": "Redundant Power Supply",
+    "Pricebook2Id": "01s5g0000000002AAA",
+    "Product2Id": "01t5g0000000017AAA",
+    "UnitPrice": 600,
+    "IsActive": true
+  },
+  {
+    "Id": "01u5g0000000035AAA",
+    "Name": "Legacy Reporting Module",
+    "Pricebook2Id": "01s5g0000000001AAA",
+    "Product2Id": "01t5g0000000018AAA",
+    "UnitPrice": 200,
+    "IsActive": false
+  },
+  {
+    "Id": "01u5g0000000036AAA",
+    "Name": "Legacy Reporting Module",
+    "Pricebook2Id": "01s5g0000000002AAA",
+    "Product2Id": "01t5g0000000018AAA",
+    "UnitPrice": 200,
+    "IsActive": false
+  }
+]

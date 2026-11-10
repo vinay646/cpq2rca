@@ -1,0 +1,23 @@
+[
+  {
+    "Id": "a355g0000000001AAA",
+    "Name": "Cover Letter",
+    "SBQQ__Template__c": "a335g0000000001AAA",
+    "SBQQ__Content__c": "a345g0000000001AAA",
+    "SBQQ__DisplayOrder__c": 10
+  },
+  {
+    "Id": "a355g0000000002AAA",
+    "Name": "Line Items",
+    "SBQQ__Template__c": "a335g0000000001AAA",
+    "SBQQ__Content__c": "a345g0000000002AAA",
+    "SBQQ__DisplayOrder__c": 20
+  },
+  {
+    "Id": "a355g0000000003AAA",
+    "Name": "Terms & Conditions",
+    "SBQQ__Template__c": "a335g0000000001AAA",
+    "SBQQ__Content__c": "a345g0000000003AAA",
+    "SBQQ__DisplayOrder__c": 30
+  }
+]

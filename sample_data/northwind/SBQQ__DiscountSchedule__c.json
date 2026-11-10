@@ -1,0 +1,35 @@
+[
+  {
+    "Id": "a105g0000000001AAA",
+    "Name": "API Calls Volume",
+    "SBQQ__Type__c": "Range",
+    "SBQQ__DiscountUnit__c": "Percent",
+    "SBQQ__AggregationScope__c": "Quote",
+    "SBQQ__CrossOrders__c": false,
+    "SBQQ__CrossProducts__c": false,
+    "SBQQ__Product__c": "01t5g0000000009AAA",
+    "SBQQ__Description__c": "Volume discount on API packs"
+  },
+  {
+    "Id": "a105g0000000002AAA",
+    "Name": "User Slab Pricing",
+    "SBQQ__Type__c": "Slab",
+    "SBQQ__DiscountUnit__c": "Percent",
+    "SBQQ__AggregationScope__c": "Quote",
+    "SBQQ__CrossOrders__c": false,
+    "SBQQ__CrossProducts__c": false,
+    "SBQQ__Product__c": "01t5g0000000004AAA",
+    "SBQQ__Description__c": "Slab discount for per-user licenses"
+  },
+  {
+    "Id": "a105g0000000003AAA",
+    "Name": "Legacy Hardware Schedule",
+    "SBQQ__Type__c": "Range",
+    "SBQQ__DiscountUnit__c": "Percent",
+    "SBQQ__AggregationScope__c": "Quote",
+    "SBQQ__CrossOrders__c": false,
+    "SBQQ__CrossProducts__c": false,
+    "SBQQ__Product__c": null,
+    "SBQQ__Description__c": "No longer referenced"
+  }
+]

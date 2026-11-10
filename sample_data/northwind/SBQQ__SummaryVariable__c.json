@@ -1,0 +1,54 @@
+[
+  {
+    "Id": "a205g0000000001AAA",
+    "Name": "Total Users",
+    "SBQQ__AggregateFunction__c": "Sum",
+    "SBQQ__AggregateField__c": "SBQQ__Quantity__c",
+    "SBQQ__TargetObject__c": "Quote Line",
+    "SBQQ__FilterField__c": "SBQQ__ProductCode__c",
+    "SBQQ__Operator__c": "equals",
+    "SBQQ__FilterValue__c": "LIC-CORE",
+    "SBQQ__CombineWith__c": null,
+    "SBQQ__CompositeOperator__c": null,
+    "SBQQ__Scope__c": "Quote"
+  },
+  {
+    "Id": "a205g0000000002AAA",
+    "Name": "Hardware Units",
+    "SBQQ__AggregateFunction__c": "Sum",
+    "SBQQ__AggregateField__c": "SBQQ__Quantity__c",
+    "SBQQ__TargetObject__c": "Quote Line",
+    "SBQQ__FilterField__c": "SBQQ__ProductFamily__c",
+    "SBQQ__Operator__c": "equals",
+    "SBQQ__FilterValue__c": "Hardware",
+    "SBQQ__CombineWith__c": null,
+    "SBQQ__CompositeOperator__c": null,
+    "SBQQ__Scope__c": "Quote"
+  },
+  {
+    "Id": "a205g0000000003AAA",
+    "Name": "Configured Users",
+    "SBQQ__AggregateFunction__c": "Sum",
+    "SBQQ__AggregateField__c": "SBQQ__Quantity__c",
+    "SBQQ__TargetObject__c": "Product Option",
+    "SBQQ__FilterField__c": "SBQQ__ProductCode__c",
+    "SBQQ__Operator__c": "equals",
+    "SBQQ__FilterValue__c": "LIC-CORE",
+    "SBQQ__CombineWith__c": null,
+    "SBQQ__CompositeOperator__c": null,
+    "SBQQ__Scope__c": "Configurator"
+  },
+  {
+    "Id": "a205g0000000004AAA",
+    "Name": "Total Services Amount",
+    "SBQQ__AggregateFunction__c": "Sum",
+    "SBQQ__AggregateField__c": "SBQQ__NetTotal__c",
+    "SBQQ__TargetObject__c": "Quote Line",
+    "SBQQ__FilterField__c": "SBQQ__ProductFamily__c",
+    "SBQQ__Operator__c": "equals",
+    "SBQQ__FilterValue__c": "Services",
+    "SBQQ__CombineWith__c": null,
+    "SBQQ__CompositeOperator__c": null,
+    "SBQQ__Scope__c": "Quote"
+  }
+]

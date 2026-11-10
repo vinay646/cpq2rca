@@ -1,0 +1,62 @@
+[
+  {
+    "Id": "a245g0000000001AAA",
+    "Name": "Disable & Remove",
+    "SBQQ__Rule__c": "a215g0000000003AAA",
+    "SBQQ__Type__c": "Disable & Remove",
+    "SBQQ__Product__c": "01t5g0000000011AAA",
+    "SBQQ__Required__c": false,
+    "SBQQ__FilterField__c": null,
+    "SBQQ__Operator__c": null,
+    "SBQQ__FilterValue__c": null,
+    "SBQQ__ValueField__c": null
+  },
+  {
+    "Id": "a245g0000000002AAA",
+    "Name": "Enable & Add",
+    "SBQQ__Rule__c": "a215g0000000003AAA",
+    "SBQQ__Type__c": "Enable & Add",
+    "SBQQ__Product__c": "01t5g0000000012AAA",
+    "SBQQ__Required__c": true,
+    "SBQQ__FilterField__c": null,
+    "SBQQ__Operator__c": null,
+    "SBQQ__FilterValue__c": null,
+    "SBQQ__ValueField__c": null
+  },
+  {
+    "Id": "a245g0000000003AAA",
+    "Name": "Add",
+    "SBQQ__Rule__c": "a215g0000000004AAA",
+    "SBQQ__Type__c": "Add",
+    "SBQQ__Product__c": "01t5g0000000017AAA",
+    "SBQQ__Required__c": true,
+    "SBQQ__FilterField__c": null,
+    "SBQQ__Operator__c": null,
+    "SBQQ__FilterValue__c": null,
+    "SBQQ__ValueField__c": null
+  },
+  {
+    "Id": "a245g0000000004AAA",
+    "Name": "Default Filter",
+    "SBQQ__Rule__c": "a215g0000000005AAA",
+    "SBQQ__Type__c": "Default Filter",
+    "SBQQ__Product__c": null,
+    "SBQQ__Required__c": false,
+    "SBQQ__FilterField__c": "Family",
+    "SBQQ__Operator__c": "equals",
+    "SBQQ__FilterValue__c": "Storage",
+    "SBQQ__ValueField__c": null
+  },
+  {
+    "Id": "a245g0000000005AAA",
+    "Name": "Add",
+    "SBQQ__Rule__c": "a215g0000000009AAA",
+    "SBQQ__Type__c": "Add",
+    "SBQQ__Product__c": null,
+    "SBQQ__Required__c": false,
+    "SBQQ__FilterField__c": null,
+    "SBQQ__Operator__c": null,
+    "SBQQ__FilterValue__c": null,
+    "SBQQ__ValueField__c": null
+  }
+]

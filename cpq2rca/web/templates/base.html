@@ -1,0 +1,13 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>{% block title %}CPQ to RCA Migration{% endblock %} | {{ company }}</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}"></head><body>
+<header><a href="{{ url_for('home') }}"><img src="{{ url_for('logo') }}" alt="{{ company }}"></a>
+<span class="t">CPQ to RCA Migration Tool</span>
+{% if name is defined %}<nav>
+<a href="{{ url_for('dashboard', name=name) }}">Dashboard</a>
+<a href="{{ url_for('items', name=name) }}">Configuration</a>
+<a href="{{ url_for('findings', name=name) }}">Findings</a>
+<a href="{{ url_for('fields', name=name) }}">Custom fields</a>
+<a href="{{ url_for('home') }}">All runs</a></nav>{% endif %}
+</header><main>{% block body %}{% endblock %}</main>
+<footer>{{ company }} &middot; CPQ to RCA Migration Tool v{{ version }} &middot; Phase 1: Extract &amp; Explain</footer></body></html>
