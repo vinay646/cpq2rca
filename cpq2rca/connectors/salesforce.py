@@ -34,15 +34,31 @@ class SalesforceConnector(Connector):
         self.timeout = timeout
 
     # ------------------------------------------------------------ auth helpers
-    @classmethod
-    def from_sf_cli(cls, alias: str) -> "SalesforceConnector":
-        sf = shutil.which("sf")
-        if not sf:
-            raise RuntimeError("Salesforce CLI ('sf') not found on PATH")
-        out = subprocess.run([sf, "org", "display", "--target-org", alias, "--verbose", "--json"],
-                             capture_output=True, text=True, check=True)
-        res = json.loads(out.stdout)["result"]
-        return cls(res["instanceUrl"], res["accessToken"])
+    
+@classmethod
+def from_sf_cli(cls, alias: str) -> "SalesforceConnector":
+    sf = shutil.which("sf")
+    if not sf:
+        raise RuntimeError("Salesforce CLI ('sf') not found on PATH")
+
+    out = subprocess.run(
+        [sf, "org", "display", "--target-org", alias, "--json"],
+        capture_output=True, text=True, check=True
+    )
+    res = json.loads(out.stdout)["result"]
+
+    token_out = subprocess.run(
+        [sf, "org", "auth", "show-access-token", "--target-org", alias, "--json"],
+        capture_output=True, text=True, check=True
+    )
+    token_result = json.loads(token_out.stdout)
+    access_token = token_result.get("result", {}).get("accessToken")
+
+    if not access_token:
+        raise RuntimeError("Salesforce CLI did not return an access token")
+
+    return cls(res["instanceUrl"], access_token)
+
 
     @classmethod
     def _token(cls, domain: str, data: dict) -> "SalesforceConnector":
