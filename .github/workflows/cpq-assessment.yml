@@ -41,8 +41,14 @@ jobs:
       - name: Authenticate to org
         env:
           AUTH_URL: ${{ secrets[inputs.auth_secret] }}
+          AUTH_SECRET_NAME: ${{ inputs.auth_secret }}
         run: |
-          if [ -z "$AUTH_URL" ]; then echo "Secret '${{ inputs.auth_secret }}' is empty or missing"; exit 1; fi
+          if [[ ! "$AUTH_SECRET_NAME" =~ ^[A-Za-z_][A-Za-z0-9_]{0,99}$ ]]; then
+            echo "Invalid secret name"
+            exit 1
+          fi
+          if [ -z "$AUTH_URL" ]; then echo "Configured secret is empty or missing"; exit 1; fi
+          umask 077
           echo "$AUTH_URL" > auth.txt
           sf org login sfdx-url --sfdx-url-file auth.txt --alias cpq-source
           rm -f auth.txt
@@ -50,10 +56,16 @@ jobs:
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
           CPQ2RCA_AI_MODEL: ${{ vars.CPQ2RCA_AI_MODEL }}
+          RUN_NAME: ${{ inputs.run_name }}
+          AI_ENABLED: ${{ inputs.ai }}
         run: |
-          AI_FLAG=""
-          if [ "${{ inputs.ai }}" = "true" ]; then AI_FLAG="--ai"; fi
-          cpq2rca run --source sf:cpq-source --out "runs/${{ inputs.run_name }}" $AI_FLAG
+          if [[ ! "$RUN_NAME" =~ ^[A-Za-z0-9][A-Za-z0-9._-]{0,63}$ ]]; then
+            echo "Run name must be 1-64 characters: letters, numbers, dot, underscore or hyphen"
+            exit 1
+          fi
+          AI_FLAG=()
+          if [ "$AI_ENABLED" = "true" ]; then AI_FLAG=(--ai); fi
+          cpq2rca run --source sf:cpq-source --out "runs/$RUN_NAME" "${AI_FLAG[@]}"
       - name: Upload deliverables
         uses: actions/upload-artifact@v4
         with:
