@@ -39,7 +39,7 @@ class SalesforceConnector(Connector):
         sf = shutil.which("sf")
         if not sf:
             raise RuntimeError("Salesforce CLI ('sf') not found on PATH")
-        out = subprocess.run([sf, "org", "display", "--target-org", alias, "--json"],
+        out = subprocess.run([sf, "org", "display", "--target-org", alias, "--verbose", "--json"],
                              capture_output=True, text=True, check=True)
         res = json.loads(out.stdout)["result"]
         return cls(res["instanceUrl"], res["accessToken"])
