@@ -3,5 +3,10 @@
   "SBQQ__QuoteLine__c": 38122,
   "Contract": 812,
   "SBQQ__Subscription__c": 6940,
-  "Asset": 2210
+  "Asset": 2210,
+  "SBQQ__Quote__c.last_12_months": 1380,
+  "SBQQ__QuoteLine__c.last_12_months": 12904,
+  "Contract.active": 455,
+  "SBQQ__Subscription__c.active": 3870,
+  "Asset.active": 1620
 }

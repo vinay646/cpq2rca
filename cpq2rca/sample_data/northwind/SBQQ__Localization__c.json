@@ -1,0 +1,58 @@
+[
+  {
+    "Id": "a415g0000000001AAA",
+    "Name": "de: BND-PRO",
+    "SBQQ__Language__c": "de",
+    "SBQQ__Label__c": "Product Name",
+    "SBQQ__APIName__c": "Name",
+    "SBQQ__Text__c": "Cloud Platform - Professional (DE)",
+    "SBQQ__Product__c": "01t5g0000000001AAA",
+    "SBQQ__ProductFeature__c": null,
+    "SBQQ__ProductOption__c": null,
+    "SBQQ__ProductRule__c": null,
+    "SBQQ__QuoteTemplate__c": null,
+    "SBQQ__TemplateContent__c": null
+  },
+  {
+    "Id": "a415g0000000002AAA",
+    "Name": "de: BND-ENT",
+    "SBQQ__Language__c": "de",
+    "SBQQ__Label__c": "Product Name",
+    "SBQQ__APIName__c": "Name",
+    "SBQQ__Text__c": "Cloud Platform - Enterprise (DE)",
+    "SBQQ__Product__c": "01t5g0000000002AAA",
+    "SBQQ__ProductFeature__c": null,
+    "SBQQ__ProductOption__c": null,
+    "SBQQ__ProductRule__c": null,
+    "SBQQ__QuoteTemplate__c": null,
+    "SBQQ__TemplateContent__c": null
+  },
+  {
+    "Id": "a415g0000000003AAA",
+    "Name": "de: LIC-CORE",
+    "SBQQ__Language__c": "de",
+    "SBQQ__Label__c": "Product Name",
+    "SBQQ__APIName__c": "Name",
+    "SBQQ__Text__c": "Core Platform License (per user) (DE)",
+    "SBQQ__Product__c": "01t5g0000000004AAA",
+    "SBQQ__ProductFeature__c": null,
+    "SBQQ__ProductOption__c": null,
+    "SBQQ__ProductRule__c": null,
+    "SBQQ__QuoteTemplate__c": null,
+    "SBQQ__TemplateContent__c": null
+  },
+  {
+    "Id": "a415g0000000004AAA",
+    "Name": "fr: proposal",
+    "SBQQ__Language__c": "fr",
+    "SBQQ__Label__c": "Template",
+    "SBQQ__APIName__c": "Name",
+    "SBQQ__Text__c": "Proposition standard Northwind",
+    "SBQQ__Product__c": null,
+    "SBQQ__ProductFeature__c": null,
+    "SBQQ__ProductOption__c": null,
+    "SBQQ__ProductRule__c": null,
+    "SBQQ__QuoteTemplate__c": "a335g0000000001AAA",
+    "SBQQ__TemplateContent__c": null
+  }
+]

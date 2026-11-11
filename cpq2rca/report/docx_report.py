@@ -284,8 +284,15 @@ def write_configuration_document(result: dict, path: str | Path, logo=None) -> P
     tx = {k: v for k, v in (s.get("transactions") or {}).items() if v}
     if tx:
         doc.add_heading("Transactional data in scope for cut-over planning", level=2)
-        _table(doc, ["Object", "Records", "Suggested RCA target"],
-               [(BY_NAME[k].label, f"{v:,}", BY_NAME[k].rca_target) for k, v in tx.items()], widths=[4, 3, 10])
+        segs = s.get("transaction_segments") or {}
+
+        def _subset(k):
+            parts = [f"{v:,} {lbl.replace('_', ' ')}" for lbl, v in (segs.get(k) or {}).items() if v is not None]
+            return ", ".join(parts) or "-"
+
+        _table(doc, ["Object", "Records", "Of which", "Suggested RCA target"],
+               [(BY_NAME[k].label, f"{v:,}", _subset(k), BY_NAME[k].rca_target) for k, v in tx.items()],
+               widths=[3.5, 2.2, 3.8, 7.5])
 
     # --------------------------------------------------------------- findings
     doc.add_heading("2. Key findings", level=1)
@@ -320,7 +327,22 @@ def write_configuration_document(result: dict, path: str | Path, logo=None) -> P
     if result["custom_fields"]:
         _table(doc, ["Field", "Used by"], [(f["field"], ", ".join(f["used_by"])) for f in result["custom_fields"]],
                widths=[5.5, 11.5], font=8.5)
-    doc.add_heading("Appendix B. Extracted record inventory", level=1)
+    schema = result.get("schema") or {}
+    if schema.get("objects"):
+        doc.add_heading("Appendix B. Custom fields on quote, product and order objects", level=1)
+        doc.add_paragraph("Custom fields found on each object. Fields on CPQ quote objects must be recreated on the "
+                          "RCA object shown. Twin fields are copied automatically by CPQ; RCA has no such sync.")
+        _table(doc, ["Object", "RCA object", "Custom fields", "Used by CPQ logic", "Twin fields"],
+               [(BY_NAME[o].label if o in BY_NAME else o, fs[0]["rca_object"] if fs else o, len(fs),
+                 sum(1 for f in fs if f["used_by"]), sum(1 for f in fs if f["twins"]))
+                for o, fs in schema["objects"].items()], widths=[4, 4, 3, 3, 3], font=8.5)
+        if schema.get("twins"):
+            doc.add_heading("Twin fields", level=2)
+            _table(doc, ["Field", "Copied from", "Copied to", "Types"],
+                   [(t["field"], t["from"], t["to"],
+                     t["from_type"] if t["type_match"] else f"{t['from_type']} -> {t['to_type']} (mismatch)")
+                    for t in schema["twins"]], widths=[4.5, 4, 4.5, 4], font=8.5)
+    doc.add_heading(f"Appendix {'C' if schema.get('objects') else 'B'}. Extracted record inventory", level=1)
     _table(doc, ["CPQ object", "API name", "Records", "Suggested RCA target"],
            [(BY_NAME[o].label if o in BY_NAME else o, o, c, BY_NAME[o].rca_target if o in BY_NAME else "")
             for o, c in s["record_counts"].items()], widths=[3.8, 5, 1.7, 6.5], font=8)

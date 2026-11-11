@@ -12,6 +12,8 @@ Each entry declares:
                 for the assessment; full extract is opt-in)
   rca_target  - suggested Revenue Cloud Advanced target. Always a suggestion,
                 confirmed during Phase 2 mapping.
+  segments    - transaction objects only: extra counts as {label: SOQL WHERE},
+                e.g. active vs. total subscriptions
 """
 
 from __future__ import annotations
@@ -30,6 +32,7 @@ class ObjectSpec:
     kind: str = "config"
     rca_target: str = ""
     where: str = ""
+    segments: dict[str, str] = field(default_factory=dict)
 
 
 # Fields that only exist in some orgs by design (e.g. CurrencyIsoCode exists only
@@ -220,23 +223,83 @@ CATALOG: list[ObjectSpec] = [
         "sbaa__FilterValue__c"],
        {"sbaa__ApprovalRule__c": "sbaa__ApprovalRule__c"},
        optional=True, rca_target="(part of approval process)"),
+    # ------------------------------------------- Search, terms, translations
+    _o("SBQQ__SearchFilter__c", "Search Filter", "Code & Process",
+       ["SBQQ__Active__c", "SBQQ__Action__c", "SBQQ__TargetObject__c", "SBQQ__TargetField__c",
+        "SBQQ__Operator__c", "SBQQ__FilterValue__c", "SBQQ__Hidden__c", "SBQQ__DisplayOrder__c"],
+       {"SBQQ__Action__c": "SBQQ__CustomAction__c"},
+       rca_target="Product Discovery catalog filter / search (confirm)"),
+    _o("SBQQ__QuoteTerm__c", "Quote Term", "Documents & Approvals",
+       ["SBQQ__Active__c", "SBQQ__Body__c", "SBQQ__PrintOrder__c", "SBQQ__Status__c",
+        "SBQQ__Locked__c", "SBQQ__ConditionsMet__c", "SBQQ__StandardTerm__c", "SBQQ__Quote__c",
+        "SBQQ__TemplateContent__c"],
+       {"SBQQ__StandardTerm__c": "SBQQ__QuoteTerm__c",
+        "SBQQ__TemplateContent__c": "SBQQ__TemplateContent__c"},
+       rca_target="Document Generation clause / conditional section (confirm)"),
+    _o("SBQQ__TermCondition__c", "Term Condition", "Documents & Approvals",
+       ["SBQQ__QuoteTerm__c", "SBQQ__Index__c", "SBQQ__TestedField__c", "SBQQ__TestedVariable__c",
+        "SBQQ__Operator__c", "SBQQ__Value__c"],
+       {"SBQQ__QuoteTerm__c": "SBQQ__QuoteTerm__c",
+        "SBQQ__TestedVariable__c": "SBQQ__SummaryVariable__c"},
+       rca_target="(part of conditional clause)"),
+    _o("SBQQ__Localization__c", "Localization (translation)", "Catalog",
+       ["SBQQ__Language__c", "SBQQ__Label__c", "SBQQ__APIName__c", "SBQQ__Text__c",
+        "SBQQ__Product__c", "SBQQ__ProductFeature__c", "SBQQ__ProductOption__c",
+        "SBQQ__ProductRule__c", "SBQQ__QuoteTemplate__c", "SBQQ__TemplateContent__c"],
+       {"SBQQ__Product__c": "Product2", "SBQQ__ProductFeature__c": "SBQQ__ProductFeature__c",
+        "SBQQ__ProductOption__c": "SBQQ__ProductOption__c",
+        "SBQQ__ProductRule__c": "SBQQ__ProductRule__c",
+        "SBQQ__QuoteTemplate__c": "SBQQ__QuoteTemplate__c",
+        "SBQQ__TemplateContent__c": "SBQQ__TemplateContent__c"},
+       rca_target="Translation Workbench / RCA product and attribute translations (confirm)"),
     # ---------------------------------------------- Transactions (count only)
     _o("SBQQ__Quote__c", "Quote", "Transactions", [], kind="transaction",
-       rca_target="Quote / QuoteLineItem"),
+       rca_target="Quote / QuoteLineItem",
+       segments={"last_12_months": "CreatedDate = LAST_N_DAYS:365"}),
     _o("SBQQ__QuoteLine__c", "Quote Line", "Transactions", [], kind="transaction",
-       rca_target="QuoteLineItem + QuoteLineRelationship"),
+       rca_target="QuoteLineItem + QuoteLineRelationship",
+       segments={"last_12_months": "CreatedDate = LAST_N_DAYS:365"}),
     _o("Contract", "Contract", "Transactions", [], kind="transaction",
-       rca_target="Contract"),
+       rca_target="Contract",
+       segments={"active": "Status = 'Activated' AND (EndDate = null OR EndDate >= TODAY)"}),
     _o("SBQQ__Subscription__c", "Subscription", "Transactions", [], kind="transaction",
-       rca_target="Asset + AssetStatePeriod / AssetActionSource"),
+       rca_target="Asset + AssetStatePeriod / AssetActionSource",
+       segments={"active": "SBQQ__TerminatedDate__c = null AND "
+                           "(SBQQ__EndDate__c = null OR SBQQ__EndDate__c >= TODAY)"}),
     _o("Asset", "Asset", "Transactions", [], kind="transaction",
-       rca_target="Asset + AssetStatePeriod"),
+       rca_target="Asset + AssetStatePeriod",
+       segments={"active": "Status NOT IN ('Obsolete', 'Returned') AND "
+                           "(UsageEndDate = null OR UsageEndDate >= TODAY)"}),
 ]
 
 BY_NAME: dict[str, ObjectSpec] = {s.name: s for s in CATALOG}
 
 CATEGORY_ORDER = ["Catalog", "Bundles", "Pricing", "Product Rules", "Price Rules",
-                  "Code & Process", "Documents & Approvals", "Transactions"]
+                  "Code & Process", "Automation", "Documents & Approvals", "Transactions"]
+
+# Objects whose custom fields are inventoried (describe), for twin fields and for
+# recreating fields on the RCA objects.
+SCHEMA_OBJECTS = ["Product2", "SBQQ__Quote__c", "SBQQ__QuoteLine__c", "Opportunity",
+                  "OpportunityLineItem", "Order", "OrderItem", "Contract",
+                  "SBQQ__Subscription__c", "Asset"]
+
+# CPQ copies a custom field's value from the first object to the second when both
+# have a field with the same API name ("twin fields"). RCA has no such sync.
+TWIN_PAIRS = [("Product2", "SBQQ__QuoteLine__c"),
+              ("SBQQ__QuoteLine__c", "OpportunityLineItem"),
+              ("SBQQ__QuoteLine__c", "OrderItem"),
+              ("SBQQ__QuoteLine__c", "SBQQ__Subscription__c"),
+              ("SBQQ__QuoteLine__c", "Asset"),
+              ("SBQQ__Quote__c", "Opportunity"),
+              ("SBQQ__Quote__c", "Order")]
+
+# Where records of each object live after the move to RCA (used for custom fields
+# and automation). Objects not listed keep their name.
+RCA_OBJECT = {"SBQQ__Quote__c": "Quote", "SBQQ__QuoteLine__c": "QuoteLineItem",
+              "SBQQ__Subscription__c": "Asset (AssetStatePeriod)"}
+
+# Objects whose Flows, Apex triggers and validation rules are inventoried.
+AUTOMATION_OBJECTS = sorted({s.name for s in CATALOG} | set(SCHEMA_OBJECTS))
 
 
 def config_objects() -> list[ObjectSpec]:

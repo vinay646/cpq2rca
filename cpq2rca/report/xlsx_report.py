@@ -120,10 +120,26 @@ def write_inventory(result: dict, path: str | Path, logo=None) -> Path:
     _sheet(wb, "Custom Fields", ["Field API name", "Label", "Referenced by (count)", "Referenced by", "RCA note"],
            [(f["field"], f["label"], f["count"], ", ".join(f["used_by"]), f["rca_note"]) for f in result["custom_fields"]],
            [32, 26, 12, 60, 50])
+    schema = result.get("schema") or {}
+    if schema.get("objects"):
+        _sheet(wb, "Object Fields", ["Object", "Field API name", "Label", "Type", "Formula", "RCA object",
+                                     "Used by CPQ logic", "Twin with"],
+               [(o, f["name"], f["label"], f["type"], "Yes" if f["formula"] else "", f["rca_object"],
+                 ", ".join(f["used_by"]), ", ".join(f["twins"]))
+                for o, fs in schema["objects"].items() for f in fs],
+               [24, 32, 26, 12, 8, 24, 40, 40])
+        _sheet(wb, "Twin Fields", ["Field API name", "Label", "Copied from", "Copied to", "From type", "To type",
+                                   "Types match"],
+               [(t["field"], t["label"], t["from"], t["to"], t["from_type"], t["to_type"],
+                 "Yes" if t["type_match"] else "No") for t in schema.get("twins", [])],
+               [32, 26, 24, 24, 12, 12, 10])
+    segs = s.get("transaction_segments") or {}
     _sheet(wb, "Record Counts", ["CPQ object", "API name", "Records", "Suggested RCA target"],
            [(BY_NAME[o].label if o in BY_NAME else o, o, c, BY_NAME[o].rca_target if o in BY_NAME else "")
             for o, c in s["record_counts"].items()]
-           + [(BY_NAME[o].label, o, c, BY_NAME[o].rca_target) for o, c in (s.get("transactions") or {}).items()],
+           + [(BY_NAME[o].label, o, c, BY_NAME[o].rca_target) for o, c in (s.get("transactions") or {}).items()]
+           + [(f"{BY_NAME[o].label} ({lbl.replace('_', ' ')})", o, c, BY_NAME[o].rca_target)
+              for o, d in segs.items() for lbl, c in d.items() if c is not None],
            [28, 34, 10, 60])
     wb.save(path)
     return path

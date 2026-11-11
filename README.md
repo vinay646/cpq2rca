@@ -8,8 +8,9 @@ complexity against Revenue Cloud Advanced (RCA), and produces the client-facing 
 
 | Output | What it is |
 |---|---|
-| `extract/*.json` + `manifest.json` | Source records per object, original IDs, field list, checksums, load order |
-| `analysis.json` | Explained items, findings, custom-field inventory, dependency graph |
+| `extract/*.json` + `manifest.json` | Source records per object, original IDs, field list, checksums, load order, transaction counts |
+| `extract/_schema.json`, `extract/_automation.json` | Custom fields on quote, product and order objects; Flows, Apex triggers and validation rules on CPQ objects |
+| `analysis.json` | Explained items, findings, custom-field and twin-field inventory, dependency graph |
 | `CPQ_Configuration_Document.docx` | Branded business-readable configuration document |
 | `CPQ_Inventory_and_Assessment.xlsx` | Inventory + assessment; the *Configuration Items* sheet has blank Phase 2 review columns (Approved RCA target, Decision, Owner, Review status) to seed the mapping workbook |
 
@@ -50,7 +51,9 @@ The repository should be **private**. Run outputs contain client data and are gi
 | Client-supplied export | Folder of `<SObject>.json` files: `--source folder:/path` |
 | OAuth flows in code | `SalesforceConnector.client_credentials(...)` / `.password_flow(...)` |
 
-The user needs read access to the SBQQ (and optional sbaa) objects. Only describe and SOQL queries are issued.
+The user needs read access to the SBQQ (and optional sbaa) objects. Only describe and SOQL queries are issued
+(REST and Tooling API). For the automation inventory (Flows, Apex triggers, validation rules) the user also needs
+**View Setup and Configuration**; without it that part is reported as incomplete and the rest of the run continues.
 Fields that do not exist in the org's CPQ package version are skipped and logged in the manifest.
 
 ## Web UI security
@@ -72,8 +75,22 @@ Job status is kept in each run folder, so it survives a restart.
 Products, price books, bundles (features, options, option constraints, configuration attributes), product rules
 (error conditions, actions, configuration rules, lookup queries), summary variables, price rules (conditions,
 actions, lookups), discount schedules and tiers, block prices, contracted prices, costs, MDQ dimensions, Quote
-Calculator Plugin (hook, field and SOQL analysis), custom actions, guided selling, quote templates, Advanced
-Approvals, and record counts for quotes, quote lines, contracts, subscriptions and assets.
+Calculator Plugin (hook, field and SOQL analysis), custom actions, guided selling, search filters, quote templates,
+quote terms and their conditions, CPQ translations (grouped by language), Advanced Approvals, and record counts for
+quotes, quote lines, contracts, subscriptions and assets.
+
+Beyond CPQ configuration it also inventories:
+
+- **Custom fields** on Product, Quote, Quote Line, Opportunity, Opportunity Product, Order, Order Product, Contract,
+  Subscription and Asset, with the RCA object each must be recreated on and which CPQ logic uses it.
+- **Twin fields**: same-named custom fields that CPQ copies automatically (product to quote line, quote line to
+  opportunity/order product, subscription and asset, quote to opportunity/order). RCA has no such sync.
+- **Automation on CPQ objects**: record-triggered Flows and Process Builder processes, Apex triggers and validation
+  rules. Logic here is often missed in migrations, and it stops running when quoting moves to RCA objects.
+- **Active vs. total** subscriptions, assets and contracts, and quotes created in the last 12 months, so the
+  transactional scope is not overstated by ended records.
+
+For a folder source, add `_schema.json` and `_automation.json` to include these (see `cpq2rca/sample_data`).
 
 **Approach scoring:**
 
@@ -94,7 +111,9 @@ Effort rates are in `explain.EFFORT` and cover configuration only. Calibrate the
 - price or product rules that share an evaluation order
 - likely duplicate rules
 - QCP and approvals redesign
-- in-flight subscriptions
+- in-flight subscriptions (active vs. total)
+- custom automation on CPQ objects to rebuild, and validation rules to recreate
+- custom fields to recreate on RCA objects, twin-field pairs, and twin fields with mismatched types
 
 ## Optional AI polish
 

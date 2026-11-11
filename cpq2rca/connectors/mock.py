@@ -4,7 +4,10 @@ Used for demos, tests, and for clients who hand over an export instead of
 granting API access. Expected layout:
     folder/_org.json            (optional org metadata)
     folder/<SObjectApiName>.json  (list of records)
-    folder/_counts.json         (optional {sobject: count} for transactional objects)
+    folder/_counts.json         (optional {sobject: count} for transactional objects;
+                                 "<sobject>.<segment>" keys for segment counts)
+    folder/_schema.json         (optional {sobject: [field metadata]} for custom fields)
+    folder/_automation.json     (optional flows / Apex triggers / validation rules)
 """
 
 from __future__ import annotations
@@ -46,13 +49,40 @@ class FolderConnector(Connector):
     def query_all(self, sobject: str, fields: list[str], where: str = "") -> list[dict]:
         return [{f: r.get(f) for f in fields} for r in self._load(sobject)]
 
-    def count(self, sobject: str) -> int:
+    def _counts(self) -> dict:
         p = self.folder / "_counts.json"
+        return json.loads(p.read_text()) if p.exists() else {}
+
+    def count(self, sobject: str, where: str = "") -> int:
+        counts = self._counts()
+        if sobject in counts:
+            return counts[sobject]
+        return len(self._load(sobject))
+
+    def count_segment(self, sobject: str, segment: str, where: str) -> int:
+        key = f"{sobject}.{segment}"
+        counts = self._counts()
+        if key not in counts:
+            raise ObjectNotFound(key)
+        return counts[key]
+
+    def describe(self, sobject: str) -> list[dict]:
+        p = self.folder / "_schema.json"
         if p.exists():
-            counts = json.loads(p.read_text())
-            if sobject in counts:
-                return counts[sobject]
-        try:
-            return len(self._load(sobject))
-        except ObjectNotFound:
-            raise
+            schema = json.loads(p.read_text())
+            if sobject in schema:
+                return schema[sobject]
+        if not (self.folder / f"{sobject}.json").exists():
+            raise ObjectNotFound(sobject)
+        return super().describe(sobject)
+
+    def automation(self, objects: list[str]) -> dict | None:
+        p = self.folder / "_automation.json"
+        if not p.exists():
+            return None
+        data = json.loads(p.read_text())
+        wanted = set(objects)
+        for key in ("apex_triggers", "validation_rules", "flows"):
+            data[key] = [r for r in data.get(key, []) if r.get("object") in wanted]
+        data.setdefault("errors", [])
+        return data

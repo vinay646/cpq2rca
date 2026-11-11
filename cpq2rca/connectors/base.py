@@ -26,4 +26,21 @@ class Connector(ABC):
     def query_all(self, sobject: str, fields: list[str], where: str = "") -> list[dict]: ...
 
     @abstractmethod
-    def count(self, sobject: str) -> int: ...
+    def count(self, sobject: str, where: str = "") -> int: ...
+
+    # ---- optional capabilities: sources that cannot provide them use these defaults
+
+    def describe(self, sobject: str) -> list[dict]:
+        """Field metadata: [{name, label, type, custom}]. Raise ObjectNotFound if absent."""
+        return [{"name": f, "label": f, "type": "", "custom": f.endswith("__c")}
+                for f in sorted(self.describe_fields(sobject))]
+
+    def count_segment(self, sobject: str, segment: str, where: str) -> int:
+        """Count of a named subset (e.g. "active" subscriptions)."""
+        return self.count(sobject, where)
+
+    def automation(self, objects: list[str]) -> dict | None:
+        """Flows, Apex triggers and validation rules on the given objects:
+        {"apex_triggers": [...], "validation_rules": [...], "flows": [...], "errors": [...]}.
+        None means the source cannot provide it (e.g. a data-only export)."""
+        return None

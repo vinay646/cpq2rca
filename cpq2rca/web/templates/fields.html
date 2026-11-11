@@ -2,4 +2,11 @@
 <h1>Custom fields referenced by CPQ logic</h1><div class="sub">These must exist in RCA (Quote / QuoteLineItem / context definition) for migrated logic to work.</div>
 <div class="tbl"><table><tr><th>Field</th><th>Label</th><th>Uses</th><th>Referenced by</th></tr>
 {% for f in r.custom_fields %}<tr><td><code>{{ f.field }}</code></td><td>{{ f.label }}</td><td>{{ f.count }}</td><td class="small">{{ f.used_by|join(', ') }}</td></tr>{% endfor %}</table></div>
+{% if r.schema and r.schema.objects %}
+<h2>Custom fields on quote, product and order objects</h2>
+<div class="sub">Fields on CPQ quote objects must be recreated on the RCA object. Twin fields are copied automatically by CPQ; RCA has no such sync.</div>
+{% for obj, fs in r.schema.objects.items() %}<h3>{{ obj }} &rarr; {{ fs[0].rca_object if fs else obj }} <span class="small muted">({{ fs|length }} custom)</span></h3>
+{% if fs %}<div class="tbl"><table><tr><th>Field</th><th>Label</th><th>Type</th><th>Used by CPQ logic</th><th>Twin with</th></tr>
+{% for f in fs %}<tr><td><code>{{ f.name }}</code></td><td>{{ f.label }}</td><td>{{ f.type }}{% if f.formula %} (formula){% endif %}</td><td class="small">{{ f.used_by|join(', ') }}</td><td class="small">{{ f.twins|join(', ') }}</td></tr>{% endfor %}</table></div>{% endif %}
+{% endfor %}{% endif %}
 {% endblock %}

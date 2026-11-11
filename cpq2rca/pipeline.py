@@ -23,6 +23,7 @@ def analyse(run_dir: str | Path, ai: bool = False, progress=None) -> dict:
         "items": items,
         "findings": fnds,
         "custom_fields": assess.custom_fields(items),
+        "schema": assess.schema_inventory(ds, items),
         "graph": assess.graph(ds, items),
     }
     (run_dir / "analysis.json").write_text(json.dumps(result, indent=1, default=str))

@@ -17,7 +17,7 @@ from __future__ import annotations
 import math
 import re
 
-from .catalog import BY_NAME
+from .catalog import BY_NAME, RCA_OBJECT
 from .model import Dataset, field_label, is_custom_field
 
 EFFORT = {"Direct": 2, "Adapt": 6, "Redesign": 16, "Retire": 0.5}
@@ -763,12 +763,177 @@ def explain_other(ds: Dataset) -> list[dict]:
     return items
 
 
+def explain_search_filters(ds: Dataset) -> list[dict]:
+    items = []
+    for f in ds.get("SBQQ__SearchFilter__c"):
+        it = _item(ds, f, "SBQQ__SearchFilter__c", "Search Filter", "Code & Process")
+        target = field_label(f.get("SBQQ__TargetField__c")) or "a product field"
+        op = OPS.get((f.get("SBQQ__Operator__c") or "equals").lower(), f.get("SBQQ__Operator__c"))
+        value = f.get("SBQQ__FilterValue__c")
+        action = ds.name(f.get("SBQQ__Action__c")) if f.get("SBQQ__Action__c") else "the product search"
+        hidden = f.get("SBQQ__Hidden__c")
+        it["summary"] = (f"{'Hidden' if hidden else 'Visible'} filter on {action}: only products where "
+                         f"{target} {op} '{value}' are listed.")
+        it["when"] = "When a rep searches for products to add to a quote."
+        it["conditions"].append(f"{target} {op} '{value}'")
+        it["fields"].append(f.get("SBQQ__TargetField__c"))
+        it["example"] = (f"Example: a rep opens {action} and sees only products whose {target} {op} "
+                         f"'{value}'" + (" without being able to change the filter." if hidden else "."))
+        dep = _dep(ds, f.get("SBQQ__Action__c"), "filters")
+        if dep:
+            it["dependencies"].append(dep)
+        items.append(_finish(it, 3))
+    return items
+
+
+def explain_quote_terms(ds: Dataset) -> list[dict]:
+    items = []
+    quote_specific = 0
+    for t in ds.get("SBQQ__QuoteTerm__c"):
+        if t.get("SBQQ__Quote__c"):
+            quote_specific += 1  # edited copy on one quote: transactional, not configuration
+            continue
+        conds = ds.children("SBQQ__TermCondition__c", "SBQQ__QuoteTerm__c", t["Id"], sort="SBQQ__Index__c")
+        it = _item(ds, t, "SBQQ__QuoteTerm__c", "Quote Term", "Documents & Approvals")
+        status = t.get("SBQQ__Status__c")
+        if status and status not in ("Approved", "Active"):
+            it["active"] = False
+        body = re.sub(r"<[^>]+>", " ", t.get("SBQQ__Body__c") or "")
+        body = re.sub(r"\s+", " ", body).strip()
+        it["summary"] = (f"Contract clause printed in the quote document"
+                         + (" when its conditions are met." if conds else " on every quote.")
+                         + (" Locked: reps cannot edit it." if t.get("SBQQ__Locked__c") else ""))
+        it["when"] = "When the quote document is generated."
+        ex = []
+        for c in conds:
+            txt, e = _condition_text(ds, "Quote", c.get("SBQQ__TestedField__c"), c.get("SBQQ__TestedVariable__c"),
+                                     c.get("SBQQ__Operator__c"), c.get("SBQQ__Value__c"))
+            it["conditions"].append(txt)
+            ex.append(e)
+            it["fields"].append(c.get("SBQQ__TestedField__c"))
+            it["source"]["children"].append(c["Id"])
+            dep = _dep(ds, c.get("SBQQ__TestedVariable__c"), "tests")
+            if dep:
+                it["dependencies"].append(dep)
+        it["logic"] = _logic(t.get("SBQQ__ConditionsMet__c"), None, len(conds)) if conds else ""
+        if body:
+            it["details"].append(f"Text: {body[:300]}{'...' if len(body) > 300 else ''}")
+        if t.get("SBQQ__PrintOrder__c") is not None:
+            it["details"].append(f"Print order: {_fmt(_num(t['SBQQ__PrintOrder__c']))}")
+        it["example"] = (f"Example: on a quote where {_join([e for e in ex if e])}, the document includes this clause."
+                         if any(ex) else "Example: every generated proposal includes this clause.")
+        items.append(_finish(it, 2 + 2 * len(conds), floor="Adapt" if conds else None))
+    if quote_specific and items:
+        items[0]["notes"].append(f"{quote_specific} quote-specific term edit(s) were not treated as configuration.")
+    return items
+
+
+def explain_localizations(ds: Dataset) -> list[dict]:
+    """One item per language: translations can number in the thousands."""
+    by_lang: dict[str, list[dict]] = {}
+    for r in ds.get("SBQQ__Localization__c"):
+        by_lang.setdefault(r.get("SBQQ__Language__c") or "(no language)", []).append(r)
+    items = []
+    kinds = (("SBQQ__Product__c", "products"), ("SBQQ__ProductFeature__c", "features"),
+             ("SBQQ__ProductOption__c", "options"), ("SBQQ__ProductRule__c", "product rule messages"),
+             ("SBQQ__QuoteTemplate__c", "quote templates"), ("SBQQ__TemplateContent__c", "template content"))
+    for lang, recs in sorted(by_lang.items()):
+        rec = {"Id": f"localization-{lang}", "Name": f"Translations: {lang}"}
+        it = _item(ds, rec, "SBQQ__Localization__c", "Localization", "Catalog")
+        covered = [f"{sum(1 for r in recs if r.get(f))} {label}" for f, label in kinds if any(r.get(f) for r in recs)]
+        it["summary"] = f"{len(recs)} CPQ translation(s) into {lang}" + (f", covering {_join(covered)}." if covered else ".")
+        it["when"] = f"When a quote or catalog is shown to users or customers in {lang}."
+        it["details"] = [f"{r.get('SBQQ__Label__c') or r.get('SBQQ__APIName__c') or r['Id']}: "
+                         f"{(r.get('SBQQ__Text__c') or '')[:80]}" for r in recs[:20]]
+        if len(recs) > 20:
+            it["details"].append(f"... and {len(recs) - 20} more")
+        it["source"]["children"] = [r["Id"] for r in recs]
+        it["example"] = f"Example: a customer receives a proposal with product names in {lang}."
+        it["fields"] = [r.get("SBQQ__APIName__c") for r in recs]
+        items.append(_finish(it, 3 + min(4, len(recs) // 100), floor="Adapt"))
+    return items
+
+
+def _a(word: str) -> str:
+    return f"{'an' if word[:1].lower() in 'aeiou' else 'a'} {word}"
+
+
+def _obj_label(obj: str) -> str:
+    spec = BY_NAME.get(obj)
+    return spec.label if spec else re.sub(r"(?<=[a-z])(?=[A-Z])", " ", obj)
+
+
+def explain_automation(ds: Dataset) -> list[dict]:
+    """Custom Flows, Apex triggers and validation rules on CPQ objects. They hold
+    pricing and quoting logic outside CPQ's own configuration and stop running
+    once quoting moves to the RCA objects."""
+    auto = ds.automation or {}
+    items = []
+
+    def base(rec, typ, obj):
+        moved = obj in RCA_OBJECT or obj.startswith(("SBQQ__", "sbaa__"))
+        target = RCA_OBJECT.get(obj) or (BY_NAME[obj].rca_target if obj in BY_NAME else obj)
+        it = _item(ds, {"Id": rec["id"], "Name": rec["name"]}, obj, typ, "Automation",
+                   active=rec.get("active", True) is not False, rca_target=target)
+        it["source"] = {"object": obj, "id": rec["id"], "children": [], "automation": True}
+        return it, moved, target
+
+    for t in auto.get("apex_triggers", []):
+        obj = t["object"]
+        it, moved, target = base(t, "Apex Trigger", obj)
+        events = ", ".join(t.get("events") or []) or "save"
+        it["summary"] = (f"Custom Apex code that runs on {_obj_label(obj)} records ({events})"
+                         + (f", about {t['lines']:,} characters of code." if t.get("lines") else "."))
+        it["when"] = f"Whenever {_a(_obj_label(obj))} record is {'saved or deleted' if 'Delete' in events else 'saved'}."
+        it["example"] = f"Example: a rep saves {_a(_obj_label(obj))} and the trigger '{t['name']}' runs custom logic."
+        it["notes"].append("The trigger body is not extracted - review the code for pricing or quoting logic.")
+        if moved:
+            it["notes"].append(f"Records move to {target} in RCA, so this trigger stops running and must be rebuilt.")
+        if t.get("api_version") and float(t["api_version"]) < 50:
+            it["notes"].append(f"Old API version {t['api_version']}.")
+        items.append(_finish(it, 9 if moved else 5, floor="Redesign" if moved else "Adapt"))
+
+    for v in auto.get("validation_rules", []):
+        obj = v["object"]
+        it, moved, target = base(v, "Validation Rule", obj)
+        msg = (v.get("error_message") or "").strip()
+        it["summary"] = f"Stops {_a(_obj_label(obj))} from being saved" + (f" with the message: '{msg}'" if msg else "") + "."
+        it["when"] = f"Whenever {_a(_obj_label(obj))} record is saved."
+        if v.get("description"):
+            it["details"].append(f"Description: {v['description']}")
+        if v.get("error_field"):
+            it["fields"].append(v["error_field"])
+        it["example"] = f"Example: a rep saves {_a(_obj_label(obj))} that breaks the rule and sees '{msg or 'an error'}'."
+        if moved:
+            it["notes"].append(f"Recreate the rule on {target}; field names change, so rewrite the formula.")
+        items.append(_finish(it, 4 if moved else 2, floor="Adapt" if moved else None))
+
+    for f in auto.get("flows", []):
+        obj = f["object"]
+        it, moved, target = base(f, f"Flow ({f.get('process_type') or 'Flow'})", obj)
+        pb = f.get("process_type") == "Workflow"
+        kind = "Process Builder process" if pb else "Record-triggered flow"
+        it["summary"] = f"{kind} on {_obj_label(obj)}" + (f": {f['description']}" if f.get("description") else ".")
+        it["when"] = {"RecordBeforeSave": "Before a record is saved.", "RecordAfterSave": "After a record is saved.",
+                      "RecordBeforeDelete": "Before a record is deleted."}.get(f.get("trigger_type"),
+                                                                                "When a record changes.")
+        it["details"].append(f"API name: {f.get('api_name')}")
+        it["example"] = f"Example: a rep saves {_a(_obj_label(obj))} and '{f['name']}' updates related data."
+        if pb:
+            it["notes"].append("Process Builder is retired by Salesforce - rebuild as a record-triggered flow.")
+        if moved:
+            it["notes"].append(f"Records move to {target} in RCA, so this flow stops running and must be rebuilt.")
+        items.append(_finish(it, 8 if (moved or pb) else 4, floor="Redesign" if (moved or pb) else "Adapt"))
+    return items
+
+
 # ------------------------------------------------------------------- entry
 def explain_all(ds: Dataset) -> list[dict]:
     items = []
     for fn in (explain_bundles, explain_option_constraints, explain_product_rules,
                explain_summary_variables, explain_price_rules, explain_discount_schedules,
-               explain_block_prices, explain_contracted_prices, explain_qcp, explain_other):
+               explain_block_prices, explain_contracted_prices, explain_qcp, explain_other,
+               explain_search_filters, explain_quote_terms, explain_localizations, explain_automation):
         items.extend(fn(ds))
     # back-references: which rules use each summary variable / product
     used_by: dict[str, list[str]] = {}
