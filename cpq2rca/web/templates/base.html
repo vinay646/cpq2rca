@@ -9,5 +9,13 @@
 <a href="{{ url_for('findings', name=name) }}">Findings</a>
 <a href="{{ url_for('fields', name=name) }}">Custom fields</a>
 <a href="{{ url_for('home') }}">All runs</a></nav>{% endif %}
-</header><main>{% block body %}{% endblock %}</main>
+{% if tester_mode %}<div class="who">
+{% if viewer %}<span class="small">Connected: <b>{{ viewer.display_name or viewer.username or viewer.org_id }}</b>{% if viewer.username %} ({{ viewer.username }}){% endif %}</span>
+<form method="post" action="{{ url_for('disconnect') }}" class="inline"><button class="link">Disconnect</button></form>{% endif %}
+{% if session.get('admin') %}<span class="small pill Adapt">Admin</span>
+<form method="post" action="{{ url_for('admin_logout') }}" class="inline"><button class="link">Log out</button></form>{% endif %}
+</div>{% endif %}
+</header><main>
+{% with msgs = get_flashed_messages() %}{% for m in msgs %}<div class="flash">{{ m }}</div>{% endfor %}{% endwith %}
+{% block body %}{% endblock %}</main>
 <footer>{{ company }} &middot; CPQ to RCA Migration Tool v{{ version }} &middot; Phase 1: Extract &amp; Explain</footer></body></html>

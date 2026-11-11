@@ -10,7 +10,8 @@ Examples
   cpq2rca serve   [--runs runs] [--port 8080]              (web UI)
 
 Token source: --source token with env SF_INSTANCE_URL and SF_ACCESS_TOKEN.
-Web UI password: env CPQ2RCA_WEB_PASSWORD (required when --host is not localhost).
+Web UI password: env CPQ2RCA_WEB_PASSWORD (required when --host is not localhost, unless tester mode).
+Tester mode ("Connect Salesforce org" login): env SF_OAUTH_CLIENT_ID etc., see cpq2rca/web/oauth.py.
 """
 
 from __future__ import annotations
@@ -51,15 +52,28 @@ def serve(runs: str, host: str, port: int) -> None:
     from .web.app import create_app
 
     password = os.environ.get("CPQ2RCA_WEB_PASSWORD")
-    if host not in LOCAL_HOSTS:
+    tester_mode = bool(os.environ.get("SF_OAUTH_CLIENT_ID"))
+    if tester_mode:
+        print("Tester mode: users connect their own Salesforce org and see only their own runs.",
+              file=sys.stderr)
+        if not os.environ.get("CPQ2RCA_ALLOWED_USERS"):
+            print("WARNING: CPQ2RCA_ALLOWED_USERS is not set, so ANY Salesforce user can connect and run "
+                  "analyses on this server. Set it to the testers' emails, @domains or org IDs.",
+                  file=sys.stderr)
+        if not os.environ.get("CPQ2RCA_SECRET_KEY"):
+            print("WARNING: CPQ2RCA_SECRET_KEY is not set: testers must reconnect after every restart.",
+                  file=sys.stderr)
         if not password:
+            print("Note: no CPQ2RCA_WEB_PASSWORD, so there is no admin login (/admin).", file=sys.stderr)
+    if host not in LOCAL_HOSTS:
+        if not password and not tester_mode:
             raise SystemExit(
                 f"Refusing to serve on {host}: other machines could read client data. "
-                "Set CPQ2RCA_WEB_PASSWORD to require a password, or use --host 127.0.0.1."
+                "Set CPQ2RCA_WEB_PASSWORD to require a password, set up tester mode "
+                "(SF_OAUTH_CLIENT_ID), or use --host 127.0.0.1."
             )
-        print(f"WARNING: serving on {host} with password protection over plain HTTP. "
-              "Put it behind HTTPS (a reverse proxy) so the password and data are encrypted.",
-              file=sys.stderr)
+        print(f"WARNING: serving on {host} over plain HTTP. Put it behind HTTPS (a reverse proxy) "
+              "so passwords, sessions and data are encrypted.", file=sys.stderr)
     create_app(runs, password=password).run(host=host, port=port)
 
 

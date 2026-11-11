@@ -31,3 +31,11 @@ pre{background:#0F1E2E;color:#D6E4F0;padding:12px;border-radius:6px;overflow:aut
 .two{display:grid;grid-template-columns:2fr 1fr;gap:18px}@media(max-width:860px){.two{grid-template-columns:1fr}}
 .legend span{display:inline-flex;align-items:center;gap:4px;margin-right:12px;font-size:12px}.legend i{width:10px;height:10px;border-radius:2px;display:inline-block}
 footer{color:var(--muted);font-size:12px;text-align:center;padding:24px}
+
+.who{display:flex;gap:10px;align-items:center;margin-left:auto}
+header nav + .who{margin-left:16px}
+form.inline{display:inline;margin:0}
+button.link{background:none;color:var(--navy);padding:0;border:none;text-decoration:underline;cursor:pointer}
+.flash{background:#FCF3CF;border:1px solid #F4D03F;border-radius:6px;padding:10px 14px;margin:0 0 16px}
+.connect{max-width:560px}
+.connect .opts{display:flex;gap:10px;flex-wrap:wrap;margin:12px 0}
