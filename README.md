@@ -70,6 +70,54 @@ works). The built-in server is plain HTTP, so put it behind an HTTPS reverse pro
 your machine. Starting a run never overwrites an existing one: if the name is taken, a number is added.
 Job status is kept in each run folder, so it survives a restart.
 
+## Tester mode: "Connect Salesforce org"
+
+Let other people (testers, prospects) connect their own org from the web UI. They sign in on Salesforce's own login
+page (OAuth 2.0 web server flow with PKCE) and only ever see their own runs.
+
+**1. Create the app in Salesforce (once).** In an org you control, create a Connected App, or an External Client App
+if your org no longer allows new Connected Apps, with:
+
+- **Callback URL:** `https://<your-server>/oauth/callback` (Salesforce only accepts `http://` for localhost)
+- **OAuth scopes:** *Manage user data via APIs (api)* and *Perform requests at any time (refresh_token, offline_access)*
+- **Require PKCE:** on. **Require secret for web server flow:** optional (set `SF_OAUTH_CLIENT_SECRET` if on)
+
+Copy the consumer key (and secret). New apps can take a few minutes before logins work. The app must be usable by
+users of **other** orgs. A Connected App is by default; a local External Client App is not and must be packaged.
+Some client orgs block apps that their admin has not installed or approved. If a tester sees an "app blocked" or
+"OAUTH_APPROVAL_ERROR" message, their admin needs to allow the app in their org.
+
+**2. Start the server:**
+
+```bash
+export SF_OAUTH_CLIENT_ID='3MVG9...'                       # consumer key
+export SF_OAUTH_CLIENT_SECRET='...'                         # only if the app requires it
+export SF_OAUTH_CALLBACK_URL='https://cpq.example.com/oauth/callback'
+export CPQ2RCA_SECRET_KEY="$(python -c 'import secrets; print(secrets.token_hex(32))')"   # keep it stable
+export CPQ2RCA_ALLOWED_USERS='ana@acme.com,@globex.com,00D5g000000AbCd'   # who may connect
+export CPQ2RCA_WEB_PASSWORD='admin-password'                # your admin login at /admin
+cpq2rca serve --host 0.0.0.0 --port 8080                     # behind an HTTPS reverse proxy
+```
+
+| Variable | Purpose |
+|---|---|
+| `SF_OAUTH_CLIENT_ID` | Turns tester mode on |
+| `SF_OAUTH_CLIENT_SECRET` | Only if the app requires a secret |
+| `SF_OAUTH_CALLBACK_URL` | Must match the app's callback URL exactly |
+| `CPQ2RCA_SECRET_KEY` | Signs session cookies. Without it, testers must reconnect after every restart |
+| `CPQ2RCA_ALLOWED_USERS` | Usernames or emails, `@domains` or org IDs allowed to connect. **If unset, any Salesforce user can connect** |
+| `CPQ2RCA_WEB_PASSWORD` | Admin password for `/admin`; admins see every run and can use all sources |
+| `CPQ2RCA_TESTER_AI` | `true` to let testers use AI polish (uses your API key) |
+
+**What testers can do:** connect a sandbox, production or My Domain org, and run against their connected org or the
+sample org. They cannot use server folders, server CLI logins or pasted tokens. Each run is tied to the tester's
+Salesforce org and user, so they see their runs again whenever they reconnect, and other testers' runs are not
+visible to them. Runs made from the command line are visible only to the admin.
+
+**Tokens** stay in server memory and are never sent to the browser. They are revoked on *Disconnect*, and a restart
+clears them, so testers simply connect again. Their run results stay on the server's disk in `runs/`; delete
+those folders when testing ends.
+
 ## What it covers
 
 Products, price books, bundles (features, options, option constraints, configuration attributes), product rules
@@ -130,7 +178,7 @@ cpq2rca/extract.py        Phase 1 extract
 cpq2rca/explain.py        rule explainer + complexity scoring
 cpq2rca/assess.py         findings, custom fields, graph, summary
 cpq2rca/report/           docx and xlsx generators, branding (report/logo.png, bundled in the package)
-cpq2rca/web/              Flask UI
+cpq2rca/web/              Flask UI (oauth.py: tester login)
 cpq2rca/sample_data/      synthetic CPQ org with deliberate issues
 ```
 

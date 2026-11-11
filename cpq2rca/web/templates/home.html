@@ -1,5 +1,21 @@
 {% extends "base.html" %}{% block body %}
-<h1>Migration runs</h1><div class="sub">Each run extracts a CPQ org, explains its configuration and produces the readiness assessment.</div>
+{% if tester_mode and not viewer and not is_admin %}
+<h1>Connect your Salesforce org</h1>
+<div class="sub">Log in with Salesforce to analyse your CPQ configuration. You only see your own runs.</div>
+<div class="card connect">
+<p>You sign in on Salesforce's own login page; this tool never sees your password. Use a <b>sandbox</b> and a user with
+read access to CPQ objects, <b>API Enabled</b> and <b>View Setup and Configuration</b>. The tool only reads from your org.</p>
+<div class="opts">
+<a class="btn" href="{{ url_for('connect', env='sandbox') }}">Connect sandbox</a>
+<a class="btn" href="{{ url_for('connect', env='production') }}">Connect production</a></div>
+<form method="get" action="{{ url_for('connect') }}"><input type="hidden" name="env" value="custom">
+<p class="small"><label>Or your My Domain login host<br>
+<input name="domain" placeholder="acme--uat.sandbox.my.salesforce.com" style="width:70%"></label>
+<button>Connect</button></p></form>
+{% if admin_login %}<p class="small muted"><a href="{{ url_for('admin_login') }}">Admin login</a></p>{% endif %}
+</div>
+{% else %}
+<h1>{% if tester_mode and not is_admin %}Your runs{% else %}Migration runs{% endif %}</h1><div class="sub">Each run extracts a CPQ org, explains its configuration and produces the readiness assessment.</div>
 <div class="two"><div>
 {% if runs %}<div class="tbl"><table><tr><th>Run</th><th>Organisation</th><th>Extracted</th><th>Items</th><th>Complexity</th><th>Effort</th></tr>
 {% for r in runs %}<tr><td><a href="{{ url_for('dashboard', name=r.name) }}">{{ r.name }}</a></td><td>{{ r.org }}</td><td class="small">{{ r.when }}</td>
@@ -13,13 +29,16 @@
 <p><label>Run name<br><input name="name" placeholder="acme-2026-11" style="width:100%"></label><br>
 <span class="small muted">If the name is taken, a number is added; existing runs are never overwritten.</span></p>
 <p><label>Source<br><select name="source" style="width:100%" onchange="for(const e of document.querySelectorAll('.src'))e.hidden=e.dataset.s!==this.value">
-<option value="sample">Sample org (Northwind, synthetic)</option><option value="sf">Salesforce CLI alias</option>
-<option value="token">Instance URL + access token</option><option value="folder">Export folder on server</option></select></label></p>
+{% if viewer %}<option value="org">My connected org ({{ viewer.username or viewer.org_id }})</option>{% endif %}
+<option value="sample">Sample org (Northwind, synthetic)</option>
+{% if is_admin %}<option value="sf">Salesforce CLI alias</option>
+<option value="token">Instance URL + access token</option><option value="folder">Export folder on server</option>{% endif %}</select></label></p>
 <p class="src" data-s="sf" hidden><input name="alias" placeholder="sf org alias" style="width:100%"></p>
 <p class="src" data-s="token" hidden><input name="instance_url" placeholder="https://acme.my.salesforce.com" style="width:100%"><br><br>
 <input name="access_token" type="password" placeholder="access token" style="width:100%"></p>
 <p class="src" data-s="folder" hidden><input name="folder" placeholder="/path/to/export" style="width:100%"></p>
-<p class="small"><label><input type="checkbox" name="ai" value="1"> Polish explanations with Claude (needs API key on server)</label></p>
+{% if is_admin or config.get('TESTER_AI') %}<p class="small"><label><input type="checkbox" name="ai" value="1"> Polish explanations with Claude (needs API key on server)</label></p>{% endif %}
 <button>Extract &amp; analyse</button></form>
 <p class="small muted">Read-only: the tool only runs describe and SOQL queries against the org.</p></div></div>
+{% endif %}
 {% endblock %}
