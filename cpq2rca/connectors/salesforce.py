@@ -25,6 +25,10 @@ MAX_ATTEMPTS = 4
 RETRY_STATUS = (429, 500, 502, 503, 504)
 
 
+class SfCliError(RuntimeError):
+    """A Salesforce CLI command failed; the message is the CLI's own."""
+
+
 class SalesforceConnector(Connector):
 
     def __init__(
@@ -51,35 +55,80 @@ class SalesforceConnector(Connector):
     # Authentication helpers
 
     @staticmethod
-    def _sf_cli_token(sf: str, alias: str) -> str:
-        token_out = subprocess.run(
-            [sf, "org", "auth", "show-access-token", "--target-org", alias, "--json"],
-            capture_output=True,
-            text=True,
-            check=True
+    def _run_sf(sf: str, args: list[str]) -> dict:
+        """Run an sf CLI command with --json and return its "result".
+
+        Raises SfCliError carrying the CLI's own message (not a bare
+        CalledProcessError) so the user can see what went wrong.
+        """
+        proc = subprocess.run(
+            [sf, *args, "--json"], capture_output=True, text=True, timeout=120
         )
-        access_token = json.loads(token_out.stdout).get("result", {}).get("accessToken")
-        if not access_token or access_token.startswith("[REDACTED]"):
-            raise RuntimeError("Salesforce CLI did not return a usable access token")
-        return access_token
+        try:
+            body = json.loads(proc.stdout or "{}")
+        except json.JSONDecodeError:
+            body = {}
+        if proc.returncode != 0 or body.get("status", 0) != 0:
+            msg = body.get("message") or proc.stderr.strip() or proc.stdout.strip()
+            raise SfCliError(f"'sf {' '.join(args)}' failed: {msg or f'exit code {proc.returncode}'}")
+        return body.get("result") or {}
+
+    @staticmethod
+    def _usable(token) -> bool:
+        return bool(token) and not str(token).startswith("[REDACTED")
+
+    @classmethod
+    def _sf_cli_token(cls, sf: str, alias: str) -> str:
+        """Get an access token from the Salesforce CLI.
+
+        Tries the commands that work across CLI versions, in order:
+          1. sf org auth show-access-token   (newer CLIs)
+          2. sf org display --verbose        (older CLIs; token in result)
+        """
+        errors = []
+        attempts = (
+            ["org", "auth", "show-access-token", "--target-org", alias],
+            ["org", "display", "--verbose", "--target-org", alias],
+        )
+        for args in attempts:
+            try:
+                token = cls._run_sf(sf, args).get("accessToken")
+            except (SfCliError, subprocess.TimeoutExpired) as e:
+                errors.append(str(e))
+                continue
+            if cls._usable(token):
+                return token
+            errors.append(f"'sf {' '.join(args)}' returned no usable access token")
+        raise RuntimeError(
+            f"Could not get an access token for org '{alias}' from the Salesforce CLI. "
+            f"Check the alias with 'sf org list' and log in again with 'sf org login web -a {alias}'. "
+            "Details: " + " | ".join(errors)
+        )
 
     @classmethod
     def from_sf_cli(cls, alias: str) -> "SalesforceConnector":
         sf = shutil.which("sf")
 
         if not sf:
-            raise RuntimeError("Salesforce CLI ('sf') not found on PATH")
+            raise RuntimeError(
+                "Salesforce CLI ('sf') not found on PATH. Install it with "
+                "'npm install --global @salesforce/cli'."
+            )
 
-        out = subprocess.run(
-            [sf, "org", "display", "--target-org", alias, "--json"],
-            capture_output=True,
-            text=True,
-            check=True
-        )
-        res = json.loads(out.stdout)["result"]
+        try:
+            res = cls._run_sf(sf, ["org", "display", "--target-org", alias])
+        except SfCliError as e:
+            raise RuntimeError(
+                f"Salesforce CLI does not know org '{alias}'. Check 'sf org list' "
+                f"or log in with 'sf org login web -a {alias}'. Details: {e}"
+            ) from e
+
+        instance_url = res.get("instanceUrl")
+        if not instance_url:
+            raise RuntimeError(f"Salesforce CLI returned no instance URL for org '{alias}'")
 
         return cls(
-            res["instanceUrl"],
+            instance_url,
             cls._sf_cli_token(sf, alias),
             token_refresher=lambda: cls._sf_cli_token(sf, alias)
         )
