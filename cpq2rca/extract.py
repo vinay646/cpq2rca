@@ -1,9 +1,12 @@
 """Phase 1 extractor: pull every catalogued CPQ object into JSON.
 
 Output (run_dir/extract/):
-    <SObject>.json   records with original Ids and lookup values intact
-    manifest.json    org info, timestamp, per-object counts, fields requested /
-                     missing, transactional counts, file checksums
+    <SObject>.json     records with original Ids and lookup values intact
+    manifest.json      org info, timestamp, per-object counts, fields requested /
+                       missing, transactional counts (and active/recent subsets),
+                       file checksums
+    _schema.json       custom fields on quote, product and order objects
+    _automation.json   Flows, Apex triggers and validation rules on CPQ objects
 
 A failure on one object (permissions, query error, timeout) is recorded in the
 manifest as status "error" and the extract carries on with the other objects.
@@ -19,7 +22,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 from . import __version__
-from .catalog import CATALOG, CONDITIONAL_FIELDS, load_order
+from .catalog import AUTOMATION_OBJECTS, CATALOG, CONDITIONAL_FIELDS, SCHEMA_OBJECTS, load_order
 from .connectors.base import ApiLimitExceeded, Connector, ObjectNotFound
 
 log = logging.getLogger(__name__)
@@ -37,6 +40,7 @@ def extract(conn: Connector, run_dir: str | Path, include_inactive_products: boo
         "org": conn.org_info(),
         "objects": {},
         "transactions": {},
+        "transaction_segments": {},
         "load_order": load_order(),
         "warnings": [],
     }
@@ -57,8 +61,63 @@ def extract(conn: Connector, run_dir: str | Path, include_inactive_products: boo
             else:
                 manifest["objects"][spec.name] = {"status": "error", "count": 0, "error": msg}
 
+    if progress:
+        progress("Custom fields (schema)")
+    _extract_schema(conn, out, manifest)
+    if progress:
+        progress("Automation (flows, Apex triggers, validation rules)")
+    _extract_automation(conn, out, manifest)
+
     (out / "manifest.json").write_text(json.dumps(manifest, indent=2))
     return manifest
+
+
+def _write(path: Path, data) -> str:
+    payload = json.dumps(data, indent=1, default=str)
+    path.write_text(payload)
+    return hashlib.sha256(payload.encode()).hexdigest()
+
+
+def _extract_schema(conn: Connector, out: Path, manifest: dict) -> None:
+    """Custom fields (not CPQ's own) on the objects that quoting touches."""
+    schema, status = {}, {}
+    for obj in SCHEMA_OBJECTS:
+        try:
+            fields = conn.describe(obj)
+        except ObjectNotFound:
+            status[obj] = "not_found"
+            continue
+        except ApiLimitExceeded:
+            raise
+        except Exception as e:  # noqa: BLE001
+            status[obj] = "error"
+            manifest["warnings"].append(f"Custom fields on {obj} could not be read ({e.__class__.__name__}: {e})")
+            continue
+        schema[obj] = [f for f in fields
+                       if f.get("custom") and not f["name"].startswith(("SBQQ__", "sbaa__"))]
+        status[obj] = len(schema[obj])
+    manifest["schema"] = {"objects": status, "sha256": _write(out / "_schema.json", schema)}
+
+
+def _extract_automation(conn: Connector, out: Path, manifest: dict) -> None:
+    try:
+        data = conn.automation(AUTOMATION_OBJECTS)
+    except ApiLimitExceeded:
+        raise
+    except Exception as e:  # noqa: BLE001
+        data = {"apex_triggers": [], "validation_rules": [], "flows": [],
+                "errors": [f"{e.__class__.__name__}: {e}"]}
+    if data is None:
+        manifest["automation"] = {"status": "not_available"}
+        return
+    manifest["automation"] = {
+        "status": "partial" if data.get("errors") else "extracted",
+        "counts": {k: len(data.get(k, [])) for k in ("apex_triggers", "validation_rules", "flows")},
+        "errors": data.get("errors", []),
+        "sha256": _write(out / "_automation.json", data),
+    }
+    for e in data.get("errors", []):
+        manifest["warnings"].append(f"Automation inventory incomplete - {e}")
 
 
 def _extract_one(conn: Connector, spec, out: Path, manifest: dict, include_inactive_products: bool) -> None:
@@ -67,6 +126,16 @@ def _extract_one(conn: Connector, spec, out: Path, manifest: dict, include_inact
             manifest["transactions"][spec.name] = conn.count(spec.name)
         except ObjectNotFound:
             manifest["transactions"][spec.name] = None
+            return
+        segs = manifest["transaction_segments"].setdefault(spec.name, {})
+        for label, where in spec.segments.items():
+            try:
+                segs[label] = conn.count_segment(spec.name, label, where)
+            except ApiLimitExceeded:
+                raise
+            except Exception as e:  # noqa: BLE001 - e.g. field missing in older orgs
+                segs[label] = None
+                log.info("%s %s count unavailable: %s", spec.name, label, e)
         return
 
     try:

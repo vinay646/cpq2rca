@@ -6,7 +6,7 @@ Authentication options:
   * Client credentials
   * Username/password
 
-Read-only: describe and SOQL query calls.
+Read-only: describe and SOQL query calls (REST and Tooling API).
 """
 
 from __future__ import annotations
@@ -48,6 +48,7 @@ class SalesforceConnector(Connector):
         # Optional callable returning a fresh access token; used once when the
         # session expires (401) part-way through a long extract.
         self.token_refresher = token_refresher
+        self._describe_cache: dict = {}
 
     def _set_token(self, access_token: str) -> None:
         self.s.headers["Authorization"] = f"Bearer {access_token}"
@@ -306,11 +307,135 @@ class SalesforceConnector(Connector):
         except Exception:
             return []
 
+    def _describe(self, sobject: str, tooling: bool = False) -> dict:
+        key = (sobject, tooling)
+        if key not in self._describe_cache:
+            base = f"{self.api}/tooling" if tooling else self.api
+            self._describe_cache[key] = self._get(f"{base}/sobjects/{sobject}/describe")
+        return self._describe_cache[key]
+
     def describe_fields(self, sobject: str) -> set[str]:
-        d = self._get(
-            f"{self.api}/sobjects/{sobject}/describe"
-        )
-        return {f["name"] for f in d["fields"]}
+        return {f["name"] for f in self._describe(sobject)["fields"]}
+
+    def describe(self, sobject: str) -> list[dict]:
+        return [
+            {
+                "name": f["name"],
+                "label": f.get("label"),
+                "type": f.get("type"),
+                "custom": bool(f.get("custom")),
+                "formula": bool(f.get("calculated")),
+                "reference_to": f.get("referenceTo") or []
+            }
+            for f in self._describe(sobject)["fields"]
+        ]
+
+    def _query(self, soql: str, tooling: bool = False) -> list[dict]:
+        base = f"{self.api}/tooling" if tooling else self.api
+        page = self._get(f"{base}/query", {"q": soql})
+        records = list(page["records"])
+        while not page.get("done", True):
+            page = self._get(self.instance_url + page["nextRecordsUrl"])
+            records.extend(page["records"])
+        for r in records:
+            r.pop("attributes", None)
+        return records
+
+    def _select(self, sobject: str, wanted: list[str], tooling: bool = False) -> list[str]:
+        """The wanted fields that exist in this org/API version (keeps queries valid)."""
+        have = {f["name"] for f in self._describe(sobject, tooling)["fields"]}
+        return [f for f in wanted if f in have]
+
+    # ---------------------------------------------------------- automation
+
+    def _entities(self, objects: list[str]) -> dict[str, dict]:
+        """Map every way an object can be referenced (API name, DurableId and its
+        15-character form) to {"name", "label"}."""
+        out = {}
+        for i in range(0, len(objects), 100):
+            names = ", ".join(f"'{o}'" for o in objects[i:i + 100])
+            for r in self._query(
+                "SELECT DurableId, QualifiedApiName, Label FROM EntityDefinition "
+                f"WHERE QualifiedApiName IN ({names})"
+            ):
+                info = {"name": r["QualifiedApiName"], "label": r.get("Label")}
+                for k in (r["QualifiedApiName"], r.get("DurableId")):
+                    if k:
+                        out[k] = info
+                        out[k[:15]] = info
+        return out
+
+    def automation(self, objects: list[str]) -> dict:
+        result = {"apex_triggers": [], "validation_rules": [], "flows": [], "errors": []}
+        try:
+            ents = self._entities(objects)
+        except Exception as e:  # noqa: BLE001
+            result["errors"].append(f"EntityDefinition: {e}")
+            ents = {o: {"name": o, "label": o} for o in objects}
+        by_label = {v["label"]: v for v in ents.values() if v.get("label")}
+
+        def resolve(ref, label=None):
+            if ref and (ref in ents or str(ref)[:15] in ents):
+                return ents.get(ref) or ents[str(ref)[:15]]
+            if label and label in by_label:
+                return by_label[label]
+            return None
+
+        def run(kind, fn):
+            try:
+                fn()
+            except ApiLimitExceeded:
+                raise
+            except Exception as e:  # noqa: BLE001 - keep the other inventories
+                result["errors"].append(f"{kind}: {e.__class__.__name__}: {str(e)[:300]}")
+
+        def triggers():
+            cols = self._select("ApexTrigger", ["Id", "Name", "TableEnumOrId", "Status", "NamespacePrefix",
+                                                "LengthWithoutComments", "ApiVersion", "UsageBeforeInsert",
+                                                "UsageAfterInsert", "UsageBeforeUpdate", "UsageAfterUpdate",
+                                                "UsageBeforeDelete", "UsageAfterDelete"], tooling=True)
+            for r in self._query(f"SELECT {', '.join(cols)} FROM ApexTrigger", tooling=True):
+                ent = resolve(r.get("TableEnumOrId"))
+                if not ent or r.get("NamespacePrefix"):
+                    continue  # not on a CPQ object, or part of a managed package
+                events = [k[5:] for k, v in r.items() if k.startswith("Usage") and v]
+                result["apex_triggers"].append({
+                    "id": r["Id"], "name": r["Name"], "object": ent["name"],
+                    "active": r.get("Status") == "Active", "lines": r.get("LengthWithoutComments"),
+                    "api_version": r.get("ApiVersion"), "events": events})
+
+        def validation_rules():
+            cols = self._select("ValidationRule", ["Id", "ValidationName", "Active", "ErrorMessage",
+                                                   "ErrorDisplayField", "EntityDefinitionId",
+                                                   "NamespacePrefix", "Description"], tooling=True)
+            for r in self._query(f"SELECT {', '.join(cols)} FROM ValidationRule", tooling=True):
+                ent = resolve(r.get("EntityDefinitionId"))
+                if not ent or r.get("NamespacePrefix"):
+                    continue
+                result["validation_rules"].append({
+                    "id": r["Id"], "name": r["ValidationName"], "object": ent["name"],
+                    "active": bool(r.get("Active")), "error_message": r.get("ErrorMessage"),
+                    "error_field": r.get("ErrorDisplayField"), "description": r.get("Description")})
+
+        def flows():
+            cols = self._select("FlowDefinitionView", ["DurableId", "ApiName", "Label", "ProcessType",
+                                                       "TriggerType", "TriggerObjectOrEventId",
+                                                       "TriggerObjectOrEventLabel", "IsActive",
+                                                       "NamespacePrefix", "Description"])
+            for r in self._query(f"SELECT {', '.join(cols)} FROM FlowDefinitionView WHERE IsActive = true"):
+                ent = resolve(r.get("TriggerObjectOrEventId"), r.get("TriggerObjectOrEventLabel"))
+                if not ent or r.get("NamespacePrefix"):
+                    continue  # only record-triggered flows / processes on CPQ objects
+                result["flows"].append({
+                    "id": r.get("DurableId") or r["ApiName"], "name": r.get("Label") or r["ApiName"],
+                    "api_name": r["ApiName"], "object": ent["name"], "active": True,
+                    "process_type": r.get("ProcessType"), "trigger_type": r.get("TriggerType"),
+                    "description": r.get("Description")})
+
+        run("Apex triggers", triggers)
+        run("Validation rules", validation_rules)
+        run("Flows", flows)
+        return result
 
     def query_all(
         self,
@@ -318,34 +443,13 @@ class SalesforceConnector(Connector):
         fields: list[str],
         where: str = ""
     ) -> list[dict]:
-
         soql = f"SELECT {', '.join(fields)} FROM {sobject}"
-
         if where:
             soql += f" WHERE {where}"
+        return self._query(soql + " ORDER BY Id")
 
-        soql += " ORDER BY Id"
-
-        page = self._get(
-            f"{self.api}/query",
-            {"q": soql}
-        )
-
-        records = list(page["records"])
-
-        while not page.get("done", True):
-            page = self._get(
-                self.instance_url + page["nextRecordsUrl"]
-            )
-            records.extend(page["records"])
-
-        for r in records:
-            r.pop("attributes", None)
-
-        return records
-
-    def count(self, sobject: str) -> int:
-        return self._get(
-            f"{self.api}/query",
-            {"q": f"SELECT COUNT() FROM {sobject}"}
-        )["totalSize"]
+    def count(self, sobject: str, where: str = "") -> int:
+        soql = f"SELECT COUNT() FROM {sobject}"
+        if where:
+            soql += f" WHERE {where}"
+        return self._get(f"{self.api}/query", {"q": soql})["totalSize"]

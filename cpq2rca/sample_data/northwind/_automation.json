@@ -1,0 +1,80 @@
+{
+  "apex_triggers": [
+    {
+      "id": "01q5g00000000001AAA",
+      "name": "QuoteLineTrigger",
+      "object": "SBQQ__QuoteLine__c",
+      "active": true,
+      "lines": 4120,
+      "api_version": 48.0,
+      "events": [
+        "BeforeInsert",
+        "BeforeUpdate",
+        "AfterUpdate"
+      ]
+    },
+    {
+      "id": "01q5g00000000002AAA",
+      "name": "OpportunityTrigger",
+      "object": "Opportunity",
+      "active": true,
+      "lines": 1530,
+      "api_version": 59.0,
+      "events": [
+        "AfterUpdate"
+      ]
+    }
+  ],
+  "validation_rules": [
+    {
+      "id": "03d5g00000000001AAA",
+      "name": "Region_Required_For_Hardware",
+      "object": "SBQQ__Quote__c",
+      "active": true,
+      "error_message": "Select a deployment region before quoting hardware.",
+      "error_field": "Deployment_Region__c",
+      "description": null
+    },
+    {
+      "id": "03d5g00000000002AAA",
+      "name": "Close_Date_Not_In_Past",
+      "object": "Opportunity",
+      "active": true,
+      "error_message": "Close date cannot be in the past.",
+      "error_field": null,
+      "description": null
+    },
+    {
+      "id": "03d5g00000000003AAA",
+      "name": "Old_Discount_Cap",
+      "object": "SBQQ__QuoteLine__c",
+      "active": false,
+      "error_message": "Discount cannot exceed 50%.",
+      "error_field": null,
+      "description": null
+    }
+  ],
+  "flows": [
+    {
+      "id": "3005g00000000001AAA",
+      "name": "Quote - Set Approval Region",
+      "api_name": "Quote_Set_Approval_Region",
+      "object": "SBQQ__Quote__c",
+      "active": true,
+      "process_type": "AutoLaunchedFlow",
+      "trigger_type": "RecordBeforeSave",
+      "description": "Copies the account region to the quote."
+    },
+    {
+      "id": "3005g00000000002AAA",
+      "name": "Order Activation Process",
+      "api_name": "Order_Activation_Process",
+      "object": "Order",
+      "active": true,
+      "process_type": "Workflow",
+      "trigger_type": "RecordAfterSave",
+      "description": null
+    }
+  ],
+  "errors": []
+}

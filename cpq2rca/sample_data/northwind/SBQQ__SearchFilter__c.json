@@ -1,0 +1,26 @@
+[
+  {
+    "Id": "a385g0000000001AAA",
+    "Name": "Active products only",
+    "SBQQ__Active__c": true,
+    "SBQQ__Action__c": null,
+    "SBQQ__TargetObject__c": "Product2",
+    "SBQQ__TargetField__c": "IsActive",
+    "SBQQ__Operator__c": "equals",
+    "SBQQ__FilterValue__c": "true",
+    "SBQQ__Hidden__c": true,
+    "SBQQ__DisplayOrder__c": 10
+  },
+  {
+    "Id": "a385g0000000002AAA",
+    "Name": "Partner-eligible products",
+    "SBQQ__Active__c": true,
+    "SBQQ__Action__c": "a305g0000000001AAA",
+    "SBQQ__TargetObject__c": "Product2",
+    "SBQQ__TargetField__c": "Partner_Tier__c",
+    "SBQQ__Operator__c": "not equals",
+    "SBQQ__FilterValue__c": "None",
+    "SBQQ__Hidden__c": false,
+    "SBQQ__DisplayOrder__c": 20
+  }
+]

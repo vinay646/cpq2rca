@@ -1,0 +1,162 @@
+{
+  "Product2": [
+    {
+      "name": "Target_Segment__c",
+      "label": "Target Segment",
+      "type": "picklist",
+      "custom": true,
+      "formula": false,
+      "reference_to": []
+    },
+    {
+      "name": "Partner_Tier__c",
+      "label": "Partner Tier",
+      "type": "picklist",
+      "custom": true,
+      "formula": false,
+      "reference_to": []
+    },
+    {
+      "name": "Requires_Shipping__c",
+      "label": "Requires Shipping",
+      "type": "boolean",
+      "custom": true,
+      "formula": false,
+      "reference_to": []
+    },
+    {
+      "name": "Deployment_Region__c",
+      "label": "Deployment Region",
+      "type": "picklist",
+      "custom": true,
+      "formula": false,
+      "reference_to": []
+    }
+  ],
+  "SBQQ__Quote__c": [
+    {
+      "name": "Strategic_Tier__c",
+      "label": "Strategic Tier",
+      "type": "picklist",
+      "custom": true,
+      "formula": false,
+      "reference_to": []
+    },
+    {
+      "name": "Margin_Percent__c",
+      "label": "Margin %",
+      "type": "percent",
+      "custom": true,
+      "formula": true,
+      "reference_to": []
+    },
+    {
+      "name": "Deployment_Region__c",
+      "label": "Deployment Region",
+      "type": "picklist",
+      "custom": true,
+      "formula": false,
+      "reference_to": []
+    },
+    {
+      "name": "Company_Size__c",
+      "label": "Company Size",
+      "type": "picklist",
+      "custom": true,
+      "formula": false,
+      "reference_to": []
+    }
+  ],
+  "SBQQ__QuoteLine__c": [
+    {
+      "name": "Requires_Shipping__c",
+      "label": "Requires Shipping",
+      "type": "boolean",
+      "custom": true,
+      "formula": false,
+      "reference_to": []
+    },
+    {
+      "name": "Deployment_Region__c",
+      "label": "Deployment Region",
+      "type": "picklist",
+      "custom": true,
+      "formula": false,
+      "reference_to": []
+    },
+    {
+      "name": "Partner_Tier__c",
+      "label": "Partner Tier",
+      "type": "string",
+      "custom": true,
+      "formula": false,
+      "reference_to": []
+    },
+    {
+      "name": "Uplift_Percent__c",
+      "label": "Uplift %",
+      "type": "percent",
+      "custom": true,
+      "formula": false,
+      "reference_to": []
+    }
+  ],
+  "Opportunity": [
+    {
+      "name": "Strategic_Tier__c",
+      "label": "Strategic Tier",
+      "type": "picklist",
+      "custom": true,
+      "formula": false,
+      "reference_to": []
+    },
+    {
+      "name": "Deployment_Region__c",
+      "label": "Deployment Region",
+      "type": "picklist",
+      "custom": true,
+      "formula": false,
+      "reference_to": []
+    }
+  ],
+  "OpportunityLineItem": [
+    {
+      "name": "Deployment_Region__c",
+      "label": "Deployment Region",
+      "type": "picklist",
+      "custom": true,
+      "formula": false,
+      "reference_to": []
+    }
+  ],
+  "Order": [
+    {
+      "name": "Strategic_Tier__c",
+      "label": "Strategic Tier",
+      "type": "picklist",
+      "custom": true,
+      "formula": false,
+      "reference_to": []
+    }
+  ],
+  "OrderItem": [
+    {
+      "name": "Requires_Shipping__c",
+      "label": "Requires Shipping",
+      "type": "boolean",
+      "custom": true,
+      "formula": false,
+      "reference_to": []
+    }
+  ],
+  "SBQQ__Subscription__c": [
+    {
+      "name": "Deployment_Region__c",
+      "label": "Deployment Region",
+      "type": "picklist",
+      "custom": true,
+      "formula": false,
+      "reference_to": []
+    }
+  ]
+}

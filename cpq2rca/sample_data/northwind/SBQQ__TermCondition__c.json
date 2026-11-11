@@ -1,0 +1,12 @@
+[
+  {
+    "Id": "a405g0000000001AAA",
+    "Name": "TC-0001",
+    "SBQQ__QuoteTerm__c": "a395g0000000002AAA",
+    "SBQQ__Index__c": 1,
+    "SBQQ__TestedField__c": null,
+    "SBQQ__TestedVariable__c": "a205g0000000002AAA",
+    "SBQQ__Operator__c": "greater than",
+    "SBQQ__Value__c": "0"
+  }
+]

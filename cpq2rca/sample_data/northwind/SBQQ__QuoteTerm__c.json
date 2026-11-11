@@ -1,0 +1,41 @@
+[
+  {
+    "Id": "a395g0000000001AAA",
+    "Name": "QT-0001",
+    "SBQQ__Active__c": true,
+    "SBQQ__PrintOrder__c": 10,
+    "SBQQ__Status__c": "Approved",
+    "SBQQ__Locked__c": true,
+    "SBQQ__ConditionsMet__c": null,
+    "SBQQ__StandardTerm__c": null,
+    "SBQQ__Quote__c": null,
+    "SBQQ__TemplateContent__c": "a345g0000000003AAA",
+    "SBQQ__Body__c": "<p>Fees are invoiced annually in advance and payable within 30 days.</p>"
+  },
+  {
+    "Id": "a395g0000000002AAA",
+    "Name": "QT-0002",
+    "SBQQ__Active__c": true,
+    "SBQQ__PrintOrder__c": 20,
+    "SBQQ__Status__c": "Approved",
+    "SBQQ__Locked__c": false,
+    "SBQQ__ConditionsMet__c": "All",
+    "SBQQ__StandardTerm__c": null,
+    "SBQQ__Quote__c": null,
+    "SBQQ__TemplateContent__c": "a345g0000000003AAA",
+    "SBQQ__Body__c": "<p>Hardware ships within 15 business days; freight is charged at cost.</p>"
+  },
+  {
+    "Id": "a395g0000000003AAA",
+    "Name": "QT-0003",
+    "SBQQ__Active__c": true,
+    "SBQQ__PrintOrder__c": 30,
+    "SBQQ__Status__c": "Draft",
+    "SBQQ__Locked__c": false,
+    "SBQQ__ConditionsMet__c": null,
+    "SBQQ__StandardTerm__c": null,
+    "SBQQ__Quote__c": null,
+    "SBQQ__TemplateContent__c": "a345g0000000003AAA",
+    "SBQQ__Body__c": "<p>Draft: data residency clause for EU customers.</p>"
+  }
+]

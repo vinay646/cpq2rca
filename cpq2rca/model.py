@@ -15,6 +15,9 @@ class Dataset:
         self.run_dir = Path(run_dir)
         ext = self.run_dir / "extract"
         self.manifest = json.loads((ext / "manifest.json").read_text())
+        # Optional inventories (absent in runs made by older tool versions).
+        self.schema: dict[str, list[dict]] = self._optional(ext / "_schema.json", {})
+        self.automation: dict | None = self._optional(ext / "_automation.json", None)
         self.records: dict[str, list[dict]] = {}
         self.by_id: dict[str, dict] = {}
         self.type_of: dict[str, str] = {}
@@ -37,6 +40,10 @@ class Dataset:
                 for f in spec.refs:
                     if r.get(f):
                         self._children[(obj, f, r[f])].append(r)
+
+    @staticmethod
+    def _optional(path: Path, default):
+        return json.loads(path.read_text()) if path.exists() else default
 
     def get(self, obj: str) -> list[dict]:
         return self.records.get(obj, [])

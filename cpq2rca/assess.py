@@ -7,7 +7,7 @@ from collections import Counter, defaultdict
 
 import networkx as nx
 
-from .catalog import BY_NAME, CATEGORY_ORDER
+from .catalog import BY_NAME, CATEGORY_ORDER, RCA_OBJECT, SCHEMA_OBJECTS, TWIN_PAIRS
 from .model import Dataset, field_label
 
 SEVERITY_ORDER = {"High": 0, "Medium": 1, "Low": 2}
@@ -91,12 +91,9 @@ def findings(ds: Dataset, items: list[dict]) -> list[dict]:
                             "Advanced Approvals does not carry over; rebuild with Flow approval processes.",
                             [a["name"] for a in appr]))
 
-    tx = ds.manifest.get("transactions", {})
-    subs = (tx.get("SBQQ__Subscription__c") or 0) + (tx.get("Asset") or 0)
-    if subs:
-        out.append(_finding("High", "Transactions", f"{subs:,} subscriptions/assets in flight",
-                            "Active contracts must be represented as RCA assets for renewals and amendments to work.",
-                            [], "Decide transactional migration and cut-over strategy."))
+    out.extend(_transaction_findings(ds))
+    out.extend(_automation_findings(ds, items))
+    out.extend(_schema_findings(ds, items))
 
     for obj, meta in ds.manifest["objects"].items():
         if meta.get("missing_fields"):
@@ -121,6 +118,127 @@ def findings(ds: Dataset, items: list[dict]) -> list[dict]:
 
     out.extend(_currency_findings(ds))
     out.sort(key=lambda f: SEVERITY_ORDER[f["severity"]])
+    return out
+
+
+def _segment(ds: Dataset, obj: str, label: str):
+    return (ds.manifest.get("transaction_segments") or {}).get(obj, {}).get(label)
+
+
+def _transaction_findings(ds: Dataset) -> list[dict]:
+    tx = ds.manifest.get("transactions", {})
+    total = (tx.get("SBQQ__Subscription__c") or 0) + (tx.get("Asset") or 0)
+    if not total:
+        return []
+    active_parts = [_segment(ds, o, "active") for o in ("SBQQ__Subscription__c", "Asset") if tx.get(o)]
+    if active_parts and all(n is not None for n in active_parts):
+        active = sum(active_parts)
+        refs = [f"{BY_NAME[o].label}: {_segment(ds, o, 'active'):,} active of {tx[o]:,}"
+                for o in ("SBQQ__Subscription__c", "Asset") if tx.get(o)]
+        c = _segment(ds, "Contract", "active")
+        if c is not None and tx.get("Contract"):
+            refs.append(f"Contract: {c:,} active of {tx['Contract']:,}")
+        if not active:
+            return [_finding("Low", "Transactions", f"No active subscriptions or assets (of {total:,} in total)",
+                             "Every subscription and asset has ended or been terminated.", refs,
+                             "Confirm whether historical records need migrating at all.")]
+        return [_finding("High", "Transactions", f"{active:,} active subscriptions/assets in flight (of {total:,} in total)",
+                         "Active contracts must be represented as RCA assets for renewals and amendments to work. "
+                         "Ended or terminated records can usually be archived instead of migrated.", refs,
+                         "Decide transactional migration and cut-over strategy.")]
+    return [_finding("High", "Transactions", f"{total:,} subscriptions/assets in flight",
+                     "Active contracts must be represented as RCA assets for renewals and amendments to work. "
+                     "The active share could not be counted, so this total includes ended records.",
+                     [], "Decide transactional migration and cut-over strategy.")]
+
+
+def _automation_findings(ds: Dataset, items: list[dict]) -> list[dict]:
+    status = (ds.manifest.get("automation") or {}).get("status")
+    if status in (None, "not_available"):
+        return [_finding("Medium", "Automation", "Flows, Apex triggers and validation rules were not inventoried",
+                         "This source does not provide automation metadata, so custom logic outside CPQ "
+                         "configuration is not in this assessment.", [],
+                         "Run against the live org, or review automation on CPQ objects manually.")]
+    out = []
+    auto = [it for it in items if it["category"] == "Automation" and it["active"]]
+    moved = [it for it in auto if it["approach"] == "Redesign"]
+    if moved:
+        out.append(_finding("High", "Automation",
+                            f"{len(moved)} custom automation(s) on CPQ objects must be rebuilt",
+                            "These Apex triggers and flows run on CPQ objects (or are Process Builder processes). "
+                            "They stop running when quoting moves to RCA objects and often hold pricing or "
+                            "quoting logic that is not visible in CPQ configuration.",
+                            [f"{it['type']}: {it['name']} ({it['object']})" for it in moved],
+                            "Review each one and add its logic to the RCA design."))
+    vr = [it for it in auto if it["type"] == "Validation Rule" and it["approach"] != "Direct"]
+    if vr:
+        out.append(_finding("Medium", "Automation", f"{len(vr)} validation rule(s) to recreate on RCA objects",
+                            "Validation rules on CPQ quote objects must be rewritten for Quote / QuoteLineItem.",
+                            [f"{it['name']} ({it['object']})" for it in vr]))
+    if status == "partial":
+        out.append(_finding("Medium", "Automation", "Automation inventory is incomplete",
+                            "Part of the automation metadata could not be read; usually the integration user "
+                            "lacks the 'View Setup and Configuration' permission.",
+                            ds.manifest["automation"].get("errors", []),
+                            "Grant the permission and re-run."))
+    return out
+
+
+def schema_inventory(ds: Dataset, items: list[dict]) -> dict:
+    """Custom fields on quote/product/order objects, which CPQ logic uses them,
+    and twin-field pairs that CPQ keeps in sync."""
+    used = defaultdict(set)
+    for it in items:
+        for f in it.get("custom_fields", []):
+            used[f].add(it["name"])
+    by_obj = {o: {f["name"]: f for f in ds.schema.get(o, [])} for o in SCHEMA_OBJECTS if o in ds.schema}
+    twins = []
+    for src, dst in TWIN_PAIRS:
+        if src not in by_obj or dst not in by_obj:
+            continue
+        for name in sorted(set(by_obj[src]) & set(by_obj[dst])):
+            a, b = by_obj[src][name], by_obj[dst][name]
+            twins.append({"field": name, "label": a.get("label") or name, "from": src, "to": dst,
+                          "from_type": a.get("type"), "to_type": b.get("type"),
+                          "type_match": not a.get("type") or not b.get("type") or a.get("type") == b.get("type")})
+    twin_of = defaultdict(list)
+    for t in twins:
+        twin_of[(t["from"], t["field"])].append(t["to"])
+        twin_of[(t["to"], t["field"])].append(t["from"])
+    objects = {}
+    for o, fields in by_obj.items():
+        objects[o] = [{"name": n, "label": f.get("label") or n, "type": f.get("type") or "",
+                       "formula": bool(f.get("formula")), "used_by": sorted(used.get(n, set())),
+                       "twins": sorted(twin_of.get((o, n), [])), "rca_object": RCA_OBJECT.get(o, o)}
+                      for n, f in sorted(fields.items())]
+    return {"objects": objects, "twins": twins}
+
+
+def _schema_findings(ds: Dataset, items: list[dict]) -> list[dict]:
+    inv = schema_inventory(ds, items)
+    out = []
+    to_move = [(o, f) for o, fs in inv["objects"].items() if o in RCA_OBJECT for f in fs]
+    if to_move:
+        per = Counter(o for o, _ in to_move)
+        out.append(_finding("Medium", "Data model",
+                            f"{len(to_move)} custom field(s) on CPQ quote objects to recreate in RCA",
+                            "Records move to the standard RCA objects, so these fields must be created there and "
+                            "added to the context definition if pricing uses them.",
+                            [f"{BY_NAME[o].label if o in BY_NAME else o} -> {RCA_OBJECT[o]}: {n} field(s)"
+                             for o, n in per.items()],
+                            "Agree which fields are still needed before Phase 2 mapping."))
+    if inv["twins"]:
+        out.append(_finding("Medium", "Data model", f"{len(inv['twins'])} twin field pair(s) kept in sync by CPQ",
+                            "CPQ copies these values automatically (e.g. product to quote line, quote line to "
+                            "order product). RCA has no twin-field sync, so each copy needs a flow, the context "
+                            "definition or a mapping.",
+                            [f"{t['field']}: {t['from']} -> {t['to']}" for t in inv["twins"]][:50],
+                            "Decide how each value is carried over in RCA."))
+    bad = [t for t in inv["twins"] if not t["type_match"]]
+    if bad:
+        out.append(_finding("Low", "Data model", f"{len(bad)} twin field pair(s) with different field types",
+                            "CPQ only syncs twin fields of compatible types, so these values may not be copied today.",
+                            [f"{t['field']}: {t['from']} ({t['from_type']}) -> {t['to']} ({t['to_type']})" for t in bad]))
     return out
 
 
@@ -199,6 +317,9 @@ def summary(ds: Dataset, items: list[dict], fnds: list[dict]) -> dict:
         "record_counts": {o: m.get("count", 0) for o, m in ds.manifest["objects"].items()},
         "total_records": sum(m.get("count", 0) for m in ds.manifest["objects"].values()),
         "transactions": ds.manifest.get("transactions", {}),
+        "transaction_segments": ds.manifest.get("transaction_segments", {}),
+        "automation": {"status": (ds.manifest.get("automation") or {}).get("status", "not_available"),
+                       **((ds.manifest.get("automation") or {}).get("counts") or {})},
         "items": len(items),
         "by_type": dict(by_type),
         "by_approach": {k: by_approach.get(k, 0) for k in ("Direct", "Adapt", "Redesign", "Retire")},

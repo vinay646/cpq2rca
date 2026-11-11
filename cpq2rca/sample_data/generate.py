@@ -443,6 +443,104 @@ ar = add("sbaa__ApprovalRule__c", Name="Margin below 40% - Finance", sbaa__Activ
 add("sbaa__ApprovalCondition__c", Name="Margin", sbaa__ApprovalRule__c=ar,
     sbaa__TestedField__c="Margin_Percent__c", sbaa__Operator__c="less than", sbaa__FilterValue__c="40")
 
+# ------------------------------------------------------------ search filters
+partner_action = next(r["Id"] for r in DATA["SBQQ__CustomAction__c"] if r["Name"] == "Apply Partner Discount")
+add("SBQQ__SearchFilter__c", Name="Active products only", SBQQ__Active__c=True, SBQQ__Action__c=None,
+    SBQQ__TargetObject__c="Product2", SBQQ__TargetField__c="IsActive", SBQQ__Operator__c="equals",
+    SBQQ__FilterValue__c="true", SBQQ__Hidden__c=True, SBQQ__DisplayOrder__c=10)
+add("SBQQ__SearchFilter__c", Name="Partner-eligible products", SBQQ__Active__c=True,
+    SBQQ__Action__c=partner_action, SBQQ__TargetObject__c="Product2",
+    SBQQ__TargetField__c="Partner_Tier__c", SBQQ__Operator__c="not equals", SBQQ__FilterValue__c="None",
+    SBQQ__Hidden__c=False, SBQQ__DisplayOrder__c=20)
+
+# --------------------------------------------------------------- quote terms
+qt_content = next(r["Id"] for r in DATA["SBQQ__TemplateContent__c"] if r["SBQQ__Type__c"] == "Quote Terms")
+add("SBQQ__QuoteTerm__c", Name="QT-0001", SBQQ__Active__c=True, SBQQ__PrintOrder__c=10,
+    SBQQ__Status__c="Approved", SBQQ__Locked__c=True, SBQQ__ConditionsMet__c=None,
+    SBQQ__StandardTerm__c=None, SBQQ__Quote__c=None, SBQQ__TemplateContent__c=qt_content,
+    SBQQ__Body__c="<p>Fees are invoiced annually in advance and payable within 30 days.</p>")
+term = add("SBQQ__QuoteTerm__c", Name="QT-0002", SBQQ__Active__c=True, SBQQ__PrintOrder__c=20,
+           SBQQ__Status__c="Approved", SBQQ__Locked__c=False, SBQQ__ConditionsMet__c="All",
+           SBQQ__StandardTerm__c=None, SBQQ__Quote__c=None, SBQQ__TemplateContent__c=qt_content,
+           SBQQ__Body__c="<p>Hardware ships within 15 business days; freight is charged at cost.</p>")
+add("SBQQ__TermCondition__c", Name="TC-0001", SBQQ__QuoteTerm__c=term, SBQQ__Index__c=1,
+    SBQQ__TestedField__c=None, SBQQ__TestedVariable__c=SV_HW, SBQQ__Operator__c="greater than",
+    SBQQ__Value__c="0")
+add("SBQQ__QuoteTerm__c", Name="QT-0003", SBQQ__Active__c=True, SBQQ__PrintOrder__c=30,
+    SBQQ__Status__c="Draft", SBQQ__Locked__c=False, SBQQ__ConditionsMet__c=None,
+    SBQQ__StandardTerm__c=None, SBQQ__Quote__c=None, SBQQ__TemplateContent__c=qt_content,
+    SBQQ__Body__c="<p>Draft: data residency clause for EU customers.</p>")
+
+# ------------------------------------------------------------- localizations
+for code in ("BND-PRO", "BND-ENT", "LIC-CORE"):
+    pid = next(r["Id"] for r in DATA["Product2"] if r["ProductCode"] == code)
+    pname = next(r["Name"] for r in DATA["Product2"] if r["ProductCode"] == code)
+    add("SBQQ__Localization__c", Name=f"de: {code}", SBQQ__Language__c="de", SBQQ__Label__c="Product Name",
+        SBQQ__APIName__c="Name", SBQQ__Text__c=f"{pname} (DE)", SBQQ__Product__c=pid,
+        SBQQ__ProductFeature__c=None, SBQQ__ProductOption__c=None, SBQQ__ProductRule__c=None,
+        SBQQ__QuoteTemplate__c=None, SBQQ__TemplateContent__c=None)
+add("SBQQ__Localization__c", Name="fr: proposal", SBQQ__Language__c="fr", SBQQ__Label__c="Template",
+    SBQQ__APIName__c="Name", SBQQ__Text__c="Proposition standard Northwind", SBQQ__Product__c=None,
+    SBQQ__ProductFeature__c=None, SBQQ__ProductOption__c=None, SBQQ__ProductRule__c=None,
+    SBQQ__QuoteTemplate__c=qt, SBQQ__TemplateContent__c=None)
+
+# ---------------------------------------- custom fields (describe) & automation
+def _f(name, label, typ="string", formula=False):
+    return {"name": name, "label": label, "type": typ, "custom": True, "formula": formula,
+            "reference_to": []}
+
+
+SCHEMA = {
+    "Product2": [_f("Target_Segment__c", "Target Segment", "picklist"),
+                 _f("Partner_Tier__c", "Partner Tier", "picklist"),
+                 _f("Requires_Shipping__c", "Requires Shipping", "boolean"),
+                 _f("Deployment_Region__c", "Deployment Region", "picklist")],
+    "SBQQ__Quote__c": [_f("Strategic_Tier__c", "Strategic Tier", "picklist"),
+                       _f("Margin_Percent__c", "Margin %", "percent", formula=True),
+                       _f("Deployment_Region__c", "Deployment Region", "picklist"),
+                       _f("Company_Size__c", "Company Size", "picklist")],
+    "SBQQ__QuoteLine__c": [_f("Requires_Shipping__c", "Requires Shipping", "boolean"),
+                           _f("Deployment_Region__c", "Deployment Region", "picklist"),
+                           _f("Partner_Tier__c", "Partner Tier", "string"),
+                           _f("Uplift_Percent__c", "Uplift %", "percent")],
+    "Opportunity": [_f("Strategic_Tier__c", "Strategic Tier", "picklist"),
+                    _f("Deployment_Region__c", "Deployment Region", "picklist")],
+    "OpportunityLineItem": [_f("Deployment_Region__c", "Deployment Region", "picklist")],
+    "Order": [_f("Strategic_Tier__c", "Strategic Tier", "picklist")],
+    "OrderItem": [_f("Requires_Shipping__c", "Requires Shipping", "boolean")],
+    "SBQQ__Subscription__c": [_f("Deployment_Region__c", "Deployment Region", "picklist")],
+}
+
+AUTOMATION = {
+    "apex_triggers": [
+        {"id": "01q5g00000000001AAA", "name": "QuoteLineTrigger", "object": "SBQQ__QuoteLine__c",
+         "active": True, "lines": 4120, "api_version": 48.0,
+         "events": ["BeforeInsert", "BeforeUpdate", "AfterUpdate"]},
+        {"id": "01q5g00000000002AAA", "name": "OpportunityTrigger", "object": "Opportunity",
+         "active": True, "lines": 1530, "api_version": 59.0, "events": ["AfterUpdate"]},
+    ],
+    "validation_rules": [
+        {"id": "03d5g00000000001AAA", "name": "Region_Required_For_Hardware", "object": "SBQQ__Quote__c",
+         "active": True, "error_message": "Select a deployment region before quoting hardware.",
+         "error_field": "Deployment_Region__c", "description": None},
+        {"id": "03d5g00000000002AAA", "name": "Close_Date_Not_In_Past", "object": "Opportunity",
+         "active": True, "error_message": "Close date cannot be in the past.", "error_field": None,
+         "description": None},
+        {"id": "03d5g00000000003AAA", "name": "Old_Discount_Cap", "object": "SBQQ__QuoteLine__c",
+         "active": False, "error_message": "Discount cannot exceed 50%.", "error_field": None,
+         "description": None},
+    ],
+    "flows": [
+        {"id": "3005g00000000001AAA", "name": "Quote - Set Approval Region", "api_name": "Quote_Set_Approval_Region",
+         "object": "SBQQ__Quote__c", "active": True, "process_type": "AutoLaunchedFlow",
+         "trigger_type": "RecordBeforeSave", "description": "Copies the account region to the quote."},
+        {"id": "3005g00000000002AAA", "name": "Order Activation Process", "api_name": "Order_Activation_Process",
+         "object": "Order", "active": True, "process_type": "Workflow", "trigger_type": "RecordAfterSave",
+         "description": None},
+    ],
+    "errors": [],
+}
+
 # ------------------------------------------------------------------- write out
 if __name__ == "__main__":
     OUT.mkdir(parents=True, exist_ok=True)
@@ -459,5 +557,9 @@ if __name__ == "__main__":
         indent=2))
     (OUT / "_counts.json").write_text(json.dumps({
         "SBQQ__Quote__c": 4210, "SBQQ__QuoteLine__c": 38122, "Contract": 812,
-        "SBQQ__Subscription__c": 6940, "Asset": 2210}, indent=2))
+        "SBQQ__Subscription__c": 6940, "Asset": 2210,
+        "SBQQ__Quote__c.last_12_months": 1380, "SBQQ__QuoteLine__c.last_12_months": 12904,
+        "Contract.active": 455, "SBQQ__Subscription__c.active": 3870, "Asset.active": 1620}, indent=2))
+    (OUT / "_schema.json").write_text(json.dumps(SCHEMA, indent=2))
+    (OUT / "_automation.json").write_text(json.dumps(AUTOMATION, indent=2))
     print(f"Wrote {sum(len(v) for v in DATA.values())} records across {len(DATA)} objects to {OUT}")
