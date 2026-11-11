@@ -197,7 +197,7 @@ def _item_block(doc, it):
 def write_configuration_document(result: dict, path: str | Path, logo=None) -> Path:
     path = Path(path)
     s, items = result["summary"], result["items"]
-    logo = logo_path(logo)
+    logo = logo_path(logo, warn=True)
     org = s.get("org", {})
     doc = Document()
     _styles(doc)
@@ -239,6 +239,7 @@ def write_configuration_document(result: dict, path: str | Path, logo=None) -> P
     for k, v in (("Organisation", org.get("org_name", "-")), ("Org ID", org.get("org_id", "-")),
                  ("Environment", "Sandbox" if org.get("is_sandbox") else "Production" if org.get("is_sandbox") is False else "-"),
                  ("CPQ package", ", ".join(f"{p['name']} {p['version']}" for p in org.get("packages", [])) or "-"),
+                 ("Currencies", ", ".join(s.get("currencies") or []) or "Single currency"),
                  ("Extracted", extracted), ("Prepared by", COMPANY)):
         _label_para(doc, k, str(v))
     doc.add_page_break()

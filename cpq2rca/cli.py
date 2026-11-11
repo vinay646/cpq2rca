@@ -20,7 +20,7 @@ import os
 import sys
 from pathlib import Path
 
-SAMPLE = Path(__file__).resolve().parents[1] / "sample_data" / "northwind"
+SAMPLE = Path(__file__).resolve().parent / "sample_data" / "northwind"
 
 
 def make_connector(source: str):
@@ -49,7 +49,7 @@ def main(argv=None):
         p.add_argument("--source", required=True)
         p.add_argument("--out", required=True)
         p.add_argument("--ai", action="store_true", help="polish explanations with Claude (needs API key)")
-        p.add_argument("--logo", help="logo image for documents (default branding/logo.png)")
+        p.add_argument("--logo", help="logo image for documents (default: bundled company logo)")
     for name in ("analyse", "docs"):
         p = sub.add_parser(name)
         p.add_argument("--out", required=True)

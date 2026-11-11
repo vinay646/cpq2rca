@@ -7,6 +7,11 @@ class ObjectNotFound(Exception):
     pass
 
 
+class ApiLimitExceeded(RuntimeError):
+    """The org's API request limit is exhausted. Fatal for the whole run: every
+    further call would fail too, so the extractor must stop rather than skip."""
+
+
 class Connector(ABC):
     """Minimal read interface the extractor needs from a source org."""
 

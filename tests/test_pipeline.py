@@ -9,7 +9,7 @@ from cpq2rca.explain import _formula_example, _satisfying, analyse_qcp
 from cpq2rca.extract import extract
 from cpq2rca.pipeline import analyse, build_documents
 
-SAMPLE = Path(__file__).parents[1] / "sample_data" / "northwind"
+SAMPLE = Path(__file__).parents[1] / "cpq2rca" / "sample_data" / "northwind"
 
 
 @pytest.fixture(scope="module")
