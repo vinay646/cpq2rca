@@ -53,6 +53,20 @@ The repository should be **private**. Run outputs contain client data and are gi
 The user needs read access to the SBQQ (and optional sbaa) objects. Only describe and SOQL queries are issued.
 Fields that do not exist in the org's CPQ package version are skipped and logged in the manifest.
 
+## Web UI security
+
+`cpq2rca serve` listens on `127.0.0.1` by default, so only your own machine can reach it. Run outputs contain
+client data, so to share it on a network you must set a password:
+
+```bash
+CPQ2RCA_WEB_PASSWORD='choose-a-strong-one' cpq2rca serve --host 0.0.0.0
+```
+
+Without the password it refuses to start on a non-local host. The browser asks for the password (any username
+works). The built-in server is plain HTTP, so put it behind an HTTPS reverse proxy when it is reachable beyond
+your machine. Starting a run never overwrites an existing one: if the name is taken, a number is added.
+Job status is kept in each run folder, so it survives a restart.
+
 ## What it covers
 
 Products, price books, bundles (features, options, option constraints, configuration attributes), product rules

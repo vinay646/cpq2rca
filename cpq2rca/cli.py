@@ -10,6 +10,7 @@ Examples
   cpq2rca serve   [--runs runs] [--port 8080]              (web UI)
 
 Token source: --source token with env SF_INSTANCE_URL and SF_ACCESS_TOKEN.
+Web UI password: env CPQ2RCA_WEB_PASSWORD (required when --host is not localhost).
 """
 
 from __future__ import annotations
@@ -41,6 +42,27 @@ def make_connector(source: str):
     raise SystemExit(f"Unknown source '{source}'. Use sample | folder:PATH | sf:ALIAS | token")
 
 
+LOCAL_HOSTS = {"127.0.0.1", "localhost", "::1"}
+
+
+def serve(runs: str, host: str, port: int) -> None:
+    """Start the web UI. Run outputs contain client data, so listening beyond
+    this machine requires a password (CPQ2RCA_WEB_PASSWORD)."""
+    from .web.app import create_app
+
+    password = os.environ.get("CPQ2RCA_WEB_PASSWORD")
+    if host not in LOCAL_HOSTS:
+        if not password:
+            raise SystemExit(
+                f"Refusing to serve on {host}: other machines could read client data. "
+                "Set CPQ2RCA_WEB_PASSWORD to require a password, or use --host 127.0.0.1."
+            )
+        print(f"WARNING: serving on {host} with password protection over plain HTTP. "
+              "Put it behind HTTPS (a reverse proxy) so the password and data are encrypted.",
+              file=sys.stderr)
+    create_app(runs, password=password).run(host=host, port=port)
+
+
 def main(argv=None):
     ap = argparse.ArgumentParser(prog="cpq2rca", description="CPQ to RCA migration tool - Phase 1")
     sub = ap.add_subparsers(dest="cmd", required=True)
@@ -69,8 +91,7 @@ def main(argv=None):
         print(f"  {msg}", file=sys.stderr)
 
     if args.cmd == "serve":
-        from .web.app import create_app
-        create_app(args.runs).run(host=args.host, port=args.port)
+        serve(args.runs, args.host, args.port)
         return
     if args.cmd in ("run", "extract"):
         conn = make_connector(args.source)

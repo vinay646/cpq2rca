@@ -6,10 +6,12 @@
 <td>{{ r.items }}</td><td><span class="pill {{ r.rating }}">{{ r.rating }}</span></td><td>{{ r.days }} d</td></tr>{% endfor %}</table></div>
 {% else %}<div class="card">No runs yet. Start one with the sample org to see the output.</div>{% endif %}
 {% for n, j in jobs.items() if j.status != 'done' %}<p class="small">Job <a href="{{ url_for('job', name=n) }}">{{ n }}</a>: {{ j.status }}</p>{% endfor %}
+{% for n in broken %}<p class="small sev-High">Run {{ n }}: analysis.json is unreadable. Re-run <code>cpq2rca analyse --out runs/{{ n }}</code>.</p>{% endfor %}
 </div>
 <div class="card"><h3 style="margin-top:0">New run</h3>
 <form method="post" action="{{ url_for('start_run') }}">
-<p><label>Run name<br><input name="name" placeholder="acme-2026-11" style="width:100%"></label></p>
+<p><label>Run name<br><input name="name" placeholder="acme-2026-11" style="width:100%"></label><br>
+<span class="small muted">If the name is taken, a number is added; existing runs are never overwritten.</span></p>
 <p><label>Source<br><select name="source" style="width:100%" onchange="for(const e of document.querySelectorAll('.src'))e.hidden=e.dataset.s!==this.value">
 <option value="sample">Sample org (Northwind, synthetic)</option><option value="sf">Salesforce CLI alias</option>
 <option value="token">Instance URL + access token</option><option value="folder">Export folder on server</option></select></label></p>
