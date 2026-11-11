@@ -5,7 +5,7 @@ rules without conditions, unused summary variables and schedules, colliding
 evaluation orders, inactive products inside bundles) so the assessment has
 something to find.
 
-    python sample_data/generate.py  ->  sample_data/northwind/*.json
+    python cpq2rca/sample_data/generate.py  ->  cpq2rca/sample_data/northwind/*.json
 """
 
 from __future__ import annotations

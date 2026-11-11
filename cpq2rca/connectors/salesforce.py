@@ -1,4 +1,3 @@
-
 """Live Salesforce connector (REST API).
 
 Authentication options:
@@ -19,9 +18,11 @@ import time
 
 import requests
 
-from .base import Connector, ObjectNotFound
+from .base import ApiLimitExceeded, Connector, ObjectNotFound
 
 API_VERSION = "v62.0"
+MAX_ATTEMPTS = 4
+RETRY_STATUS = (429, 500, 502, 503, 504)
 
 
 class SalesforceConnector(Connector):
@@ -31,18 +32,36 @@ class SalesforceConnector(Connector):
         instance_url: str,
         access_token: str,
         api_version: str = API_VERSION,
-        timeout: int = 120
+        timeout: int = 120,
+        token_refresher=None
     ):
         self.instance_url = instance_url.rstrip("/")
         self.api = f"{self.instance_url}/services/data/{api_version}"
         self.s = requests.Session()
-        self.s.headers.update({
-            "Authorization": f"Bearer {access_token}",
-            "Accept": "application/json"
-        })
+        self.s.headers.update({"Accept": "application/json"})
+        self._set_token(access_token)
         self.timeout = timeout
+        # Optional callable returning a fresh access token; used once when the
+        # session expires (401) part-way through a long extract.
+        self.token_refresher = token_refresher
+
+    def _set_token(self, access_token: str) -> None:
+        self.s.headers["Authorization"] = f"Bearer {access_token}"
 
     # Authentication helpers
+
+    @staticmethod
+    def _sf_cli_token(sf: str, alias: str) -> str:
+        token_out = subprocess.run(
+            [sf, "org", "auth", "show-access-token", "--target-org", alias, "--json"],
+            capture_output=True,
+            text=True,
+            check=True
+        )
+        access_token = json.loads(token_out.stdout).get("result", {}).get("accessToken")
+        if not access_token or access_token.startswith("[REDACTED]"):
+            raise RuntimeError("Salesforce CLI did not return a usable access token")
+        return access_token
 
     @classmethod
     def from_sf_cli(cls, alias: str) -> "SalesforceConnector":
@@ -57,33 +76,13 @@ class SalesforceConnector(Connector):
             text=True,
             check=True
         )
-
         res = json.loads(out.stdout)["result"]
 
-        token_out = subprocess.run(
-            [
-                sf,
-                "org",
-                "auth",
-                "show-access-token",
-                "--target-org",
-                alias,
-                "--json"
-            ],
-            capture_output=True,
-            text=True,
-            check=True
+        return cls(
+            res["instanceUrl"],
+            cls._sf_cli_token(sf, alias),
+            token_refresher=lambda: cls._sf_cli_token(sf, alias)
         )
-
-        token_result = json.loads(token_out.stdout)
-        access_token = token_result.get("result", {}).get("accessToken")
-
-        if not access_token or access_token.startswith("[REDACTED]"):
-            raise RuntimeError(
-                "Salesforce CLI did not return a usable access token"
-            )
-
-        return cls(res["instanceUrl"], access_token)
 
     @classmethod
     def _token(cls, domain: str, data: dict) -> "SalesforceConnector":
@@ -125,18 +124,39 @@ class SalesforceConnector(Connector):
     # API calls
 
     def _get(self, url: str, params=None) -> dict:
-        for attempt in range(4):
-            r = self.s.get(
-                url,
-                params=params,
-                timeout=self.timeout
-            )
+        refreshed = False
+        attempt = 0
+        while True:
+            attempt += 1
+            try:
+                r = self.s.get(url, params=params, timeout=self.timeout)
+            except (requests.ConnectionError, requests.Timeout) as e:
+                if attempt < MAX_ATTEMPTS:
+                    time.sleep(2 ** attempt * 5)
+                    continue
+                raise RuntimeError(
+                    f"Salesforce API unreachable after {attempt} attempts: {e}"
+                ) from e
 
             if r.status_code == 404:
                 raise ObjectNotFound(url)
 
-            if r.status_code in (429, 503) and attempt < 3:
-                time.sleep(2 ** attempt * 5)
+            if r.status_code == 401 and self.token_refresher and not refreshed:
+                # Session expired mid-run: get a new token once and retry.
+                self._set_token(self.token_refresher())
+                refreshed = True
+                continue
+
+            if r.status_code == 403 and "REQUEST_LIMIT_EXCEEDED" in r.text:
+                raise ApiLimitExceeded(
+                    "Salesforce API request limit exceeded for this org. "
+                    "Wait for the 24-hour limit to reset or ask the client to "
+                    f"raise it, then re-run. Details: {r.text[:300]}"
+                )
+
+            if r.status_code in RETRY_STATUS and attempt < MAX_ATTEMPTS:
+                retry_after = r.headers.get("Retry-After", "")
+                time.sleep(int(retry_after) if retry_after.isdigit() else 2 ** attempt * 5)
                 continue
 
             if r.status_code >= 400:
@@ -145,8 +165,6 @@ class SalesforceConnector(Connector):
                 )
 
             return r.json()
-
-        raise RuntimeError("Salesforce API retry limit reached")
 
     def org_info(self) -> dict:
         try:
@@ -170,6 +188,7 @@ class SalesforceConnector(Connector):
                 "is_sandbox": org.get("IsSandbox"),
                 "instance_url": self.instance_url,
                 "packages": pkgs,
+                "currencies": self._currencies(),
                 "source": "salesforce"
             }
 
@@ -179,6 +198,30 @@ class SalesforceConnector(Connector):
                 "source": "salesforce",
                 "warning": str(e)
             }
+
+    def _currencies(self) -> list[dict]:
+        """Active currencies. CurrencyType only exists when multi-currency is
+        enabled, so an empty list means a single-currency org."""
+        try:
+            q = self._get(
+                f"{self.api}/query",
+                {
+                    "q": (
+                        "SELECT IsoCode, IsCorporate, ConversionRate "
+                        "FROM CurrencyType WHERE IsActive = true"
+                    )
+                }
+            )
+        except (ObjectNotFound, RuntimeError):
+            return []
+        return [
+            {
+                "iso_code": r["IsoCode"],
+                "corporate": bool(r.get("IsCorporate")),
+                "conversion_rate": r.get("ConversionRate")
+            }
+            for r in q.get("records", [])
+        ]
 
     def _installed_packages(self) -> list[dict]:
         try:

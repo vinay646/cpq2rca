@@ -20,4 +20,5 @@ cpq2rca = "cpq2rca.cli:main"
 include = ["cpq2rca*"]
 
 [tool.setuptools.package-data]
-cpq2rca = ["web/templates/*.html", "web/static/*"]
+cpq2rca = ["web/templates/*.html", "web/static/*", "report/logo.png",
+           "sample_data/generate.py", "sample_data/northwind/*.json"]

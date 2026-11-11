@@ -49,7 +49,7 @@ def write_inventory(result: dict, path: str | Path, logo=None) -> Path:
     wb = Workbook()
     ws = wb.active
     ws.title = "Summary"
-    lp = logo_path(logo)
+    lp = logo_path(logo, warn=True)
     if lp:
         img = XLImage(str(lp))
         img.height, img.width = 47, 200

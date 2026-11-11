@@ -102,9 +102,57 @@ def findings(ds: Dataset, items: list[dict]) -> list[dict]:
         if meta.get("missing_fields"):
             out.append(_finding("Low", "Extraction", f"{obj}: {len(meta['missing_fields'])} field(s) not in org",
                                 "Older CPQ package version or field removed.", meta["missing_fields"]))
+    for obj, meta in ds.manifest["objects"].items():
+        if meta.get("status") == "error":
+            out.append(_finding("High", "Extraction", f"{obj} could not be extracted",
+                                "The object exists but the query failed, so this area of the assessment is "
+                                "incomplete. Usually caused by missing permissions for the integration user "
+                                "or a timeout.", [meta.get("error", "")],
+                                "Fix access for the integration user and re-run the extract."))
     for w in ds.manifest.get("warnings", []):
+        if "could not be extracted" in w:
+            continue  # already reported above / transactional count failure
         out.append(_finding("Medium", "Extraction", w, "Expected object was not found."))
+    for obj, n in (ds.manifest.get("transactions") or {}).items():
+        if n is None and any(obj in w and "could not be extracted" in w for w in ds.manifest.get("warnings", [])):
+            out.append(_finding("Medium", "Extraction", f"{obj} could not be counted",
+                                "The record count query failed, so in-flight volumes are understated.", [],
+                                "Check the integration user's access and re-run."))
+
+    out.extend(_currency_findings(ds))
     out.sort(key=lambda f: SEVERITY_ORDER[f["severity"]])
+    return out
+
+
+def currencies(ds: Dataset) -> list[str]:
+    """ISO codes in use: the org's active currencies plus any CurrencyIsoCode on extracted records."""
+    codes = {c["iso_code"] for c in ds.manifest.get("org", {}).get("currencies", []) if c.get("iso_code")}
+    for recs in ds.records.values():
+        codes.update(r["CurrencyIsoCode"] for r in recs if r.get("CurrencyIsoCode"))
+    return sorted(codes)
+
+
+def _currency_findings(ds: Dataset) -> list[dict]:
+    codes = currencies(ds)
+    if len(codes) < 2:
+        return []
+    out = [_finding("Medium", "Pricing", f"Multi-currency org: {len(codes)} currencies ({', '.join(codes)})",
+                    "Price book entries, contracted prices, block prices, discount schedules and costs are "
+                    "held per currency. The RCA price book, price adjustment schedule and pricing procedure "
+                    "design must cover every currency.",
+                    codes, "Confirm which currencies are in scope and how conversion rates are maintained.")]
+    # Same product + price book in several currencies looks like duplicate entries
+    # unless the currency is taken into account.
+    per_key = defaultdict(set)
+    for r in ds.get("PricebookEntry"):
+        if r.get("CurrencyIsoCode"):
+            per_key[(r.get("Pricebook2Id"), r.get("Product2Id"))].add(r["CurrencyIsoCode"])
+    multi = [f"{ds.name(pb)} / {ds.name(prod)}: {', '.join(sorted(c))}"
+             for (pb, prod), c in per_key.items() if len(c) > 1]
+    if multi:
+        out.append(_finding("Low", "Pricing", f"{len(multi)} product price(s) defined in several currencies",
+                            "Each currency needs its own price book entry in RCA; do not de-duplicate these.",
+                            multi[:50]))
     return out
 
 
@@ -160,6 +208,7 @@ def summary(ds: Dataset, items: list[dict], fnds: list[dict]) -> dict:
         "complexity_rating": rating,
         "avg_score": round(avg, 1),
         "findings": Counter(f["severity"] for f in fnds),
+        "currencies": currencies(ds),
         "products": len(ds.get("Product2")),
         "active_products": sum(1 for p in ds.get("Product2") if p.get("IsActive") is not False),
     }

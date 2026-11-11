@@ -32,6 +32,12 @@ class ObjectSpec:
     where: str = ""
 
 
+# Fields that only exist in some orgs by design (e.g. CurrencyIsoCode exists only
+# when multi-currency is enabled). Their absence is expected, so it is not reported
+# as a missing field.
+CONDITIONAL_FIELDS = frozenset({"CurrencyIsoCode"})
+
+
 def _o(name, label, category, fields, refs=None, **kw) -> ObjectSpec:
     return ObjectSpec(name, label, category, tuple(["Id", "Name", *fields]), refs or {}, **kw)
 
@@ -53,7 +59,7 @@ CATALOG: list[ObjectSpec] = [
        {"SBQQ__DiscountSchedule__c": "SBQQ__DiscountSchedule__c"},
        rca_target="Product2 + ProductSellingModel / ProductSellingModelOption + ProductClassification"),
     _o("PricebookEntry", "Price Book Entry", "Pricing",
-       ["Pricebook2Id", "Product2Id", "UnitPrice", "IsActive"],
+       ["Pricebook2Id", "Product2Id", "UnitPrice", "IsActive", "CurrencyIsoCode"],
        {"Pricebook2Id": "Pricebook2", "Product2Id": "Product2"},
        rca_target="PricebookEntry (with ProductSellingModelId)"),
     _o("SBQQ__ProductFeature__c", "Product Feature", "Bundles",
@@ -149,7 +155,7 @@ CATALOG: list[ObjectSpec] = [
     _o("SBQQ__DiscountSchedule__c", "Discount Schedule", "Pricing",
        ["SBQQ__Type__c", "SBQQ__DiscountUnit__c", "SBQQ__AggregationScope__c",
         "SBQQ__CrossOrders__c", "SBQQ__CrossProducts__c", "SBQQ__Product__c",
-        "SBQQ__Description__c"],
+        "SBQQ__Description__c", "CurrencyIsoCode"],
        {"SBQQ__Product__c": "Product2"},
        rca_target="PriceAdjustmentSchedule"),
     _o("SBQQ__DiscountTier__c", "Discount Tier", "Pricing",
@@ -160,16 +166,16 @@ CATALOG: list[ObjectSpec] = [
        rca_target="PriceAdjustmentTier"),
     _o("SBQQ__BlockPrice__c", "Block Price", "Pricing",
        ["SBQQ__Product__c", "SBQQ__PriceBook2__c", "SBQQ__LowerBound__c",
-        "SBQQ__UpperBound__c", "SBQQ__Price__c"],
+        "SBQQ__UpperBound__c", "SBQQ__Price__c", "CurrencyIsoCode"],
        {"SBQQ__Product__c": "Product2", "SBQQ__PriceBook2__c": "Pricebook2"},
        rca_target="Tiered / block pricing in pricing procedure (confirm)"),
     _o("SBQQ__ContractedPrice__c", "Contracted Price", "Pricing",
        ["SBQQ__Account__c", "SBQQ__Product__c", "SBQQ__Price__c", "SBQQ__Discount__c",
-        "SBQQ__EffectiveDate__c", "SBQQ__ExpirationDate__c"],
+        "SBQQ__EffectiveDate__c", "SBQQ__ExpirationDate__c", "CurrencyIsoCode"],
        {"SBQQ__Product__c": "Product2"},
        rca_target="Account-specific pricing (decision table / price book) - confirm"),
     _o("SBQQ__Cost__c", "Cost", "Pricing",
-       ["SBQQ__Product__c", "SBQQ__UnitCost__c", "SBQQ__Active__c"],
+       ["SBQQ__Product__c", "SBQQ__UnitCost__c", "SBQQ__Active__c", "CurrencyIsoCode"],
        {"SBQQ__Product__c": "Product2"},
        rca_target="Cost book / cost element in pricing procedure (confirm)"),
     _o("SBQQ__Dimension__c", "Price Dimension (MDQ)", "Pricing",

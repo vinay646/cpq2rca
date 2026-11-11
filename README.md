@@ -19,7 +19,7 @@ complexity against Revenue Cloud Advanced (RCA), and produces the client-facing 
 pip install -e .                       # Python 3.10+
 cpq2rca run --source sample --out runs/demo     # synthetic "Northwind Cloud" org
 cpq2rca serve --runs runs                        # http://127.0.0.1:8080
-pytest -q                                        # 8 tests
+pytest -q
 ```
 
 ## Running on GitHub
@@ -96,9 +96,9 @@ cpq2rca/connectors/       salesforce.py (REST, OAuth), mock.py (folder)
 cpq2rca/extract.py        Phase 1 extract
 cpq2rca/explain.py        rule explainer + complexity scoring
 cpq2rca/assess.py         findings, custom fields, graph, summary
-cpq2rca/report/           docx and xlsx generators, branding (branding/logo.png)
+cpq2rca/report/           docx and xlsx generators, branding (report/logo.png, bundled in the package)
 cpq2rca/web/              Flask UI
-sample_data/generate.py   synthetic CPQ org with deliberate issues
+cpq2rca/sample_data/      synthetic CPQ org with deliberate issues
 ```
 
 ## Known limits / next steps
